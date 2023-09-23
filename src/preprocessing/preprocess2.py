@@ -1,5 +1,4 @@
 import os
-#print(os.listdir('../../../secrets'))
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import requests
@@ -10,11 +9,12 @@ import numpy as np
 # Constants
 IMG_SIZE = 128  # Resize images to 128x128 for faster processing
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')  # Retrieve from environment variable
-#print(os.listdir('os.getcwd()'))
-os.environ['GOOGLE_APPLICATION_CREDENTIALS']='~/Users/peter/Desktop/AC215/GitClones/secrets/data-service-account.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS']='./secrets/data-service-account.json'
 
 # URL of the nutritions dataset to download
 dataset_url = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
+
+gcs_object_name = "nutrients.csv"
 
 # Local file path to save the downloaded nutritions dataset
 local_file_path = "nutrients.csv"
@@ -58,7 +58,7 @@ def preprocess_data():
         preprocess_and_upload(img, label_str)        
     
 # Function to download the nutritions dataset from the URL
-def download_nutritions(url, local_path):
+def download_dataset(url, local_path):
     response = requests.get(url)
     response.raise_for_status()
     
@@ -78,5 +78,5 @@ if __name__ == "__main__":
     # Download the nutritions dataset
     download_dataset(dataset_url, local_file_path)
     # Upload the downloaded nutritions dataset to GCS
-    upload_to_gcs(gcs_bucket_name, local_file_path, gcs_object_name)
+    upload_to_gcs(BUCKET_NAME, local_file_path, gcs_object_name)
     print(f"Preprocessed data uploaded to GCS bucket {BUCKET_NAME}")
