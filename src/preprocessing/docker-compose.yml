@@ -14,9 +14,9 @@ services:
       - ./PlatePals_project:/app
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/data-service-account.json
-      GCP_PROJECT: "PlatePals"
+      GCP_PROJECT: "AC215"
       GCP_ZONE: "us-central1-a"
-      GCS_BUCKET_NAME: "food101"
+      GCS_BUCKET_NAME: "platepals_data"
   validation:
     build:
       context: ./src/validation
@@ -27,6 +27,6 @@ services:
       - ./PlatePals_project:/app
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/data-service-account.json
-      GCP_PROJECT: "PlatePals"
+      GCP_PROJECT: "AC215"
       GCP_ZONE: "us-central1-a"
-      GCS_BUCKET_NAME: "food101"
+      GCS_BUCKET_NAME: "platepals_data"

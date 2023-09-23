@@ -30,7 +30,7 @@ def preprocess_data():
     """Load and preprocess the Food-101 dataset."""
     (ds_train, ds_test), ds_info = tfds.load(
         'food101',
-        split=['train', 'test'],
+        split=['train[:1%]', 'test[:1%]'],
         shuffle_files=True,
         as_supervised=True,
         with_info=True,
