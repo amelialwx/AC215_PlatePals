@@ -29,7 +29,7 @@ def preprocess_and_upload(image, label):
 def preprocess_data():
     """Load and preprocess the Food-101 dataset."""
     (ds_train, ds_test), ds_info = tfds.load(
-        'food101',
+        'mnist',
         split=['train[:1%]', 'test[:1%]'],
         shuffle_files=True,
         as_supervised=True,
@@ -47,5 +47,5 @@ def preprocess_data():
         preprocess_and_upload(img, label_str)
 
 if __name__ == "__main__":
-    preprocess_data()
+    #preprocess_data()
     print(f"Preprocessed data uploaded to GCS bucket {BUCKET_NAME}")

@@ -1,4 +1,9 @@
 #!/bin/bash
+# Navigate to the directory where the Dockerfile is located.
 cd ../preprocessing
+
+# Build the Docker image.
 docker build -t preprocess-image .
-docker run -e GOOGLE_APPLICATION_CREDENTIALS='/secrets/data-service-account.json' preprocess-image
+
+# Run the Docker container, passing in the environment variable.
+docker run -e GCS_BUCKET_NAME=platepals_data preprocess-image
