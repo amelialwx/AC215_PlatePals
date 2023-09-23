@@ -1,0 +1,32 @@
+version: "3.8"
+networks:
+  default:
+    name: platepals-network
+    external: true
+services:
+  preprocess:
+    build:
+      context: ./src/preprocessing
+      dockerfile: Dockerfile
+    container_name: platepals-preprocess
+    volumes:
+      - ./secrets:/secrets
+      - ./PlatePals_project:/app
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/data-service-account.json
+      GCP_PROJECT: "PlatePals"
+      GCP_ZONE: "us-central1-a"
+      GCS_BUCKET_NAME: "food101"
+  validation:
+    build:
+      context: ./src/validation
+      dockerfile: Dockerfile
+    container_name: platepals-validation
+    volumes:
+      - ./secrets:/secrets
+      - ./PlatePals_project:/app
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/data-service-account.json
+      GCP_PROJECT: "PlatePals"
+      GCP_ZONE: "us-central1-a"
+      GCS_BUCKET_NAME: "food101"
