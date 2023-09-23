@@ -48,5 +48,8 @@ ADD --chown=app:app . /app
 # Entry point
 ENTRYPOINT ["/bin/bash"]
 
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Get into the pipenv shell
 CMD ["python", "preprocess.py"]
