@@ -13,10 +13,10 @@ BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')  # Retrie
 #print(os.listdir('os.getcwd()'))
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='~/Users/peter/Desktop/AC215/GitClones/secrets/data-service-account.json'
 
-# URL of the dataset to download
+# URL of the nutritions dataset to download
 dataset_url = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
 
-# Local file path to save the downloaded dataset
+# Local file path to save the downloaded nutritions dataset
 local_file_path = "nutrients.csv"
 
 def preprocess_and_upload(image, label):
@@ -57,8 +57,8 @@ def preprocess_data():
         label_str = ds_info.features['label'].int2str(label)
         preprocess_and_upload(img, label_str)        
     
-# Function to download the dataset from the URL
-def download_dataset(url, local_path):
+# Function to download the nutritions dataset from the URL
+def download_nutritions(url, local_path):
     response = requests.get(url)
     response.raise_for_status()
     
@@ -75,9 +75,8 @@ def upload_to_gcs(bucket_name, source_file, destination_blob_name):
 if __name__ == "__main__":
     preprocess_data()
     
-    # Nutrition stuff
-    # Download the dataset
+    # Download the nutritions dataset
     download_dataset(dataset_url, local_file_path)
-    # Upload the downloaded dataset to GCS
+    # Upload the downloaded nutritions dataset to GCS
     upload_to_gcs(gcs_bucket_name, local_file_path, gcs_object_name)
     print(f"Preprocessed data uploaded to GCS bucket {BUCKET_NAME}")
