@@ -21,7 +21,7 @@ def preprocess_and_upload(image, label_str):
     blob_name = f"{label_str}/{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
 
     # Initialize Google Cloud Storage client
-    client = storage.Client()
+    client = storage.Client.from_service_account_json('../secrets/data-service-account.json')
     bucket = client.get_bucket(BUCKET_NAME)
 
     blob = bucket.blob(blob_name)
@@ -31,7 +31,7 @@ def preprocess_data():
     """Load and preprocess the Food-101 dataset."""
     (ds_train, ds_test), ds_info = tfds.load(
         'mnist',
-        split=['train[:1%]', 'test[:1%]'],
+        split=['train', 'test'],
         shuffle_files=True,
         as_supervised=True,
         with_info=True,
@@ -49,4 +49,4 @@ def preprocess_data():
 
 if __name__ == "__main__":
     preprocess_data()
-    print(f"Preprocessed data uploaded to GCS bucket {BUCKET_NAME}")
+    print(f"Preprocessed data uploaded to GCS bucket {BUCKET_NAME}.")

@@ -1,7 +1,3 @@
 #!/bin/bash
-
-# Perform any setup here
-# ...
-
-# Run your Python script
+echo "Starting script"
 exec python preprocess.py "$@"

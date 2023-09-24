@@ -1,15 +1,25 @@
+# Use the official Debian-hosted Python image
 FROM python:3.9-slim-buster
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-# Install necessary packages and libraries
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Tell pipenv where the shell is. 
+ENV PYENV_SHELL=/bin/bash
 
-# Copy source code
-COPY . .
+# Ensure we have an up-to-date baseline, install dependencies
+RUN set -ex && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends build-essential git && \
+    pip install --no-cache-dir --upgrade pip
 
-# Run the preprocessing script
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# Copy requirements and install Python packages
+COPY requirements.txt /
+RUN pip install -r /requirements.txt
 
+# Add everything
+ADD . /app
+
+# Entry point
+ENTRYPOINT ["/bin/bash", "./docker-entrypoint.sh"]
