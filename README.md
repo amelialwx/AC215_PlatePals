@@ -50,6 +50,6 @@ We will primarily be using the TensorFlow food101 dataset, which contains 101,00
 (3) `src/preprocessing/Dockerfile` - This dockerfile starts with  `python:3.9-slim-buster`. This <statement> attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
 
 To run Dockerfile -
-(1) Put `secrets` folder containing `data-service-account.json` two directories back from the `preprocessing` directory.
-(2) Navigate to the `preprocessing` directory.
-(3) Run `sh docker-shell.sh`
+- Put `secrets` folder containing `data-service-account.json` two directories back from the `preprocessing` directory.
+- Navigate to the `preprocessing` directory.
+- Run `sh docker-shell.sh`
