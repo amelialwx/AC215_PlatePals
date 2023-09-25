@@ -5,11 +5,14 @@ import os
 from google.cloud import storage
 from PIL import Image
 import numpy as np
+import zipfile
+import io
 
 # Constants
 IMG_SIZE = 128
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+print("GOOGLE_APPLICATION_CREDENTIALS", GOOGLE_APPLICATION_CREDENTIALS)
 
 # Data augmentation layer
 Data_augmentation = tf.keras.Sequential([
@@ -25,23 +28,32 @@ def preprocess_img(image, label, image_shape=IMG_SIZE):
     image = tf.image.resize(image, [image_shape, image_shape])
     return tf.cast(image, tf.float32), label
 
-def preprocess_and_upload(image, label_str, split):
-    img = tf.image.resize(image, (IMG_SIZE, IMG_SIZE))
-    img = tf.cast(img, tf.uint8)
-    img_encoded = tf.image.encode_jpeg(img)
+def create_zip_and_upload(ds, ds_info, split):
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for img_batch, label_batch in ds.take(1):
+            for img, label in zip(img_batch, label_batch):
+                label_str = ds_info.features['label'].int2str(label.numpy())
+                file_name = f"{split}/{label_str}/{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
+                
+                # Cast the image to uint8 before encoding
+                img_uint8 = tf.cast(img, tf.uint8)
+                img_encoded = tf.image.encode_jpeg(img_uint8)
+                
+                zf.writestr(file_name, img_encoded.numpy())
 
-    # Adjust blob_name to have "train", "val", or "test" and then class folder
-    blob_name = f"{split}/{label_str}/{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
+    zip_buffer.seek(0)
+    blob_name = f"{split}.zip"
 
     client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS)
     bucket = client.get_bucket(BUCKET_NAME)
     blob = bucket.blob(blob_name)
-    blob.upload_from_string(img_encoded.numpy(), content_type='image/jpeg')
+    blob.upload_from_file(zip_buffer, content_type='application/zip')
 
 def preprocess_data():
     (ds_train, ds_val, ds_test), ds_info = tfds.load(
         'food101',
-        split=['train', 'validation[:10100]', 'validation[10100:]'],
+        split=['train', 'validation[:40%]', 'validation[40%:]'],
         shuffle_files=True,
         as_supervised=True,
         with_info=True,
@@ -55,20 +67,9 @@ def preprocess_data():
     ds_val = ds_val.batch(batch_size=32).prefetch(buffer_size=1000)
     ds_test = ds_test.batch(batch_size=32).prefetch(buffer_size=1000)
 
-    for img_batch, label_batch in ds_train.take(1):
-        for img, label in zip(img_batch, label_batch):
-            label_str = ds_info.features['label'].int2str(label.numpy())
-            preprocess_and_upload(img, label_str, 'train')
-
-    for img_batch, label_batch in ds_val.take(1):
-        for img, label in zip(img_batch, label_batch):
-            label_str = ds_info.features['label'].int2str(label.numpy())
-            preprocess_and_upload(img, label_str, 'val')
-
-    for img_batch, label_batch in ds_test.take(1):
-        for img, label in zip(img_batch, label_batch):
-            label_str = ds_info.features['label'].int2str(label.numpy())
-            preprocess_and_upload(img, label_str, 'test')
+    create_zip_and_upload(ds_train, ds_info, 'train')
+    create_zip_and_upload(ds_val, ds_info, 'val')
+    create_zip_and_upload(ds_test, ds_info, 'test')
 
 
 if __name__ == "__main__":
