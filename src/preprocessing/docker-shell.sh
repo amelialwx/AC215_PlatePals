@@ -14,10 +14,6 @@ export GCP_PROJECT="My Project 1919"
 export GCP_ZONE="us-central1-a"
 export GOOGLE_APPLICATION_CREDENTIALS=/../secrets/data-service-account.json
 
-echo "checking file names"
-echo "BASE_DIR: $BASE_DIR"
-echo "SECRETS_DIR: $SECRETS_DIR"
-
 # Check to see if path to secrets is correct
 if [ ! -f "$SECRETS_DIR/data-service-account.json" ]; then
     echo "data-service-account.json not found at the path you have provided."
