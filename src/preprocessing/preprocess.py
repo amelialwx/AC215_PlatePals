@@ -6,13 +6,16 @@ from google.cloud import storage
 from PIL import Image
 import numpy as np
 import zipfile
+import requests
 import io
 
 # Constants
 IMG_SIZE = 128
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-print("GOOGLE_APPLICATION_CREDENTIALS", GOOGLE_APPLICATION_CREDENTIALS)
+dataset_url = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
+gcs_object_name = "nutrients.csv"
+local_file_path = "nutrients.csv"
 
 # Data augmentation layer
 Data_augmentation = tf.keras.Sequential([
@@ -71,7 +74,21 @@ def preprocess_data():
     create_zip_and_upload(ds_val, ds_info, 'val')
     create_zip_and_upload(ds_test, ds_info, 'test')
 
+def download_nutrients_dataset(url, local_path):
+    response = requests.get(url)
+    response.raise_for_status()
+    
+    with open(local_path, "wb") as f:
+        f.write(response.content)
+
+def upload_nutrients_to_gcs(bucket_name, source_file, destination_blob_name):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(source_file)
 
 if __name__ == "__main__":
     preprocess_data()
+    download_nutrients_dataset(dataset_url, local_file_path)
+    upload_nutrients_to_gcs(BUCKET_NAME, local_file_path, gcs_object_name)
     print(f"Preprocessed and augmented data uploaded to GCS bucket {BUCKET_NAME}.")
