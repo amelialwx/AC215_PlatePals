@@ -8,6 +8,7 @@ import numpy as np
 # Constants
 IMG_SIZE = 128  # Resize images to 128x128 for faster processing
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')  # Retrieve from environment variable
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 
 def preprocess_and_upload(image, label_str):
     """Preprocess a single image and upload it to GCS."""
@@ -21,7 +22,7 @@ def preprocess_and_upload(image, label_str):
     blob_name = f"{label_str}/{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
 
     # Initialize Google Cloud Storage client
-    client = storage.Client.from_service_account_json('../secrets/data-service-account.json')
+    client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS)
     bucket = client.get_bucket(BUCKET_NAME)
 
     blob = bucket.blob(blob_name)
