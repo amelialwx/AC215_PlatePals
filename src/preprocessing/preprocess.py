@@ -75,6 +75,9 @@ def preprocess_data():
     create_zip_and_upload(ds_test, ds_info, 'test')
 
 def download_nutrients_dataset(url, local_path):
+    if os.path.exists(local_path):
+        os.remove(local_path)
+
     response = requests.get(url)
     response.raise_for_status()
     
@@ -86,9 +89,10 @@ def upload_nutrients_to_gcs(bucket_name, source_file, destination_blob_name):
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_filename(source_file)
+    os.remove(source_file)
 
 if __name__ == "__main__":
-    preprocess_data()
+    #preprocess_data()
     download_nutrients_dataset(dataset_url, local_file_path)
     upload_nutrients_to_gcs(BUCKET_NAME, local_file_path, gcs_object_name)
     print(f"Preprocessed and augmented data uploaded to GCS bucket {BUCKET_NAME}.")
