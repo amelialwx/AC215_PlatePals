@@ -1,7 +1,22 @@
-AC215-Template (Final Milestone)
+AC215 - Milestone 2 (PlatePals)
 ==============================
+**Team Members**
 
-AC215 - Milestone2
+- Amelia Li
+- Rebecca Qiu
+- Peter Wu
+
+**Group Name**
+
+PlatePals
+
+**Project**
+
+The goal of this project is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with relevant nutritional information and personalized dietary recommendations. This project will involve key phases of data preprocessing, model development, and application interface development, leveraging TensorFlow's Food-101 dataset.
+
+### Milestone 2 ###
+
+We'll predominantly employ TensorFlow's Food-101 dataset, featuring 101,000 annotated food images across 101 categories. Additionally, we will correlate the identified food items with nutritional metrics obtained from Kaggle's Nutrition datasets and a database called Nutritional Facts for Most Common Foods, which together offer around 9,000 nutritional records. Our dataset is securely hosted in a private Google Cloud Bucket.
 
 Project Organization
 ------------
@@ -20,36 +35,49 @@ Project Organization
                 ├── docker-shell.sh
                 ├── preprocess.py
                 └── requirements.txt
+Preprocess container
+------------
+- This container ingests 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) and performs image preprocessing before uploading the modified data to a GCS Bucket.
+- It also fetches and uploads [nutritional data](https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv) as a CSV file to the same GCS Bucket.
+- Required inputs: GCS Project Name and GCS Bucket Name.
+- Output: Processed data stored in the GCS Bucket.
 
---------
-# AC215 - Milestone2 - PlatePals
+(1) `src/preprocessing/preprocess.py`: This file manages the preprocessing of our 4.65GB dataset. Image dimensions are resized to 128x128 pixels to expedite subsequent processing. We apply random transformations such as horizontal flips, rotations, and zooms. These preprocessed images are batch-processed and uploaded to the GCS Bucket as a zip file.
 
-**Team Members**
-Amelia Li, Rebecca Qiu, Peter Wu
+(2) `src/preprocessing/requirements.txt`: Lists the Python packages essential for image preprocessing.
 
-**Group Name**
-PlatePals
+(3) `src/preprocessing/Dockerfile`: The Dockerfile is configured to use `python:3.9-slim-buster`. It sets up volumes and uses secret keys (which should not be uploaded to GitHub) for connecting to the GCS Bucket.
 
-**Project**
-The goal of this project is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with relevant nutritional information and personalized dietary recommendations. This project will involve key phases of data preprocessing, model development, and application interface development, leveraging TensorFlow's Food-101 dataset.
+Running our code
+------------
+**Setup GCP Service Account**
+1. Create a secrets folder that is on the same level as the project folder.
+2. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
+3. Search for "Service Accounts" from the top search box OR go to: "IAM & Admins" > "Service Accounts" and create a new service account called "PlatePals". 
+4. For "Grant this service account access to project", select "Cloud Storage" > "Storage Object Viewer"
+5. Click done. This will create a service account.
+6. Click on the "..." under the "Actions" column and select "Manage keys".
+7. Click on "ADD KEY" > "Create new key" with "Key type" as JSON.
+8. Copy this JSON file into the secrets folder created in step 1 and rename it as "data-service-account.json".
 
-### Milestone2 ###
+**Setup GCS Bucket**
+1. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
+2. Search for "Buckets" from the top search box OR go to: "Cloud Storage" > "Buckets" and create a new bucket with an appropriate bucket name e.g. "platepals-test".
+3. Click done. This will create a new GCS Bucket.
 
-We will primarily be using the TensorFlow food101 dataset, which contains 101,000 labeled food images covering 101 food classes. We will be mapping the macronutrients of each food class with the Kaggle Nutrition datasets and Nutrional Facts for most common foods, containing around 9000 nutritional information combined. We parked our dataset in a private Google Cloud Bucket. 
+**Set GCP Credentials**
+1. Head to src/preprocessing/docker-shell.sh.
+2. Replace `GCS_BUCKET_NAME` and `GCP_PROJECT` with corresponding GCS Bucket Name that you have chosen above and GCP Project Name.
+3. Repeat step 2 for src/preprocessing/docker-shell.bat.
 
-**Preprocess container**
-- This container reads 4.65GB of data and resizes the image sizes and stores it back to GCP
-- This container also downloads and stores nutritions data as a CSV file back to GCP
-- Input to this container is source and destincation GCS location, parameters for resizing, secrets needed - via docker
-- Output from this container stored at GCS location
+**Execute Dockerfile**
+1. Make sure the Docker application is operational.
+2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
+3. Upon completion, your GCS Bucket should display the processed data as shown.
+![bucket-data](assets/bucket-data.png)
 
-(1) `src/preprocessing/preprocess.py`  - Here we do preprocessing on our dataset of 4.65GB, we reduce the image sizes (a parameter that can be changed later) to 128x128 for faster iteration with our process. Now we save this dataset on GCS. 
+#### Challenges and Future Directions
 
-(2) `src/preprocessing/requirements.txt` - We used following packages to help us preprocess here.
+1. **Data Transfer Time**: We've observed that the data download and upload process currently takes between 2-3 hours. Although we've optimized the process to some extent, we aim to investigate further to determine whether these durations can be shortened. This is on our agenda for the next milestone.
 
-(3) `src/preprocessing/Dockerfile` - This dockerfile starts with  `python:3.9-slim-buster`. This <statement> attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
-
-To run Dockerfile -
-- Put `secrets` folder containing `data-service-account.json` two directories back from the `preprocessing` directory.
-- Navigate to the `preprocessing` directory.
-- Run `sh docker-shell.sh`
+2. **Remote Data and DVC Integration**: Our attempts to integrate DVC have been unsuccessful due to the remote storage of our dataset in a GCS Bucket. The in-class examples primarily utilize locally-stored data, making our remote setup a complicating factor. We're exploring alternative solutions, such as employing `gcsfuse` to potentially mount our GCS Bucket, to address this challenge.

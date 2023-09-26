@@ -10,12 +10,15 @@ import requests
 import io
 
 # Constants
-IMG_SIZE = 256
+IMG_SIZE = 128
+
+# GCS
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+
+# Nutrients dataset
 dataset_url = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
-gcs_object_name = "nutrients.csv"
-local_file_path = "nutrients.csv"
+gcs_object_name, local_file_path = "nutrients.csv"
 
 # Data augmentation layer
 Data_augmentation = tf.keras.Sequential([
@@ -26,21 +29,25 @@ Data_augmentation = tf.keras.Sequential([
     preprocessing.RandomWidth(0.2)
 ], name="data_augmentation")
 
+# Function to preprocess image
 def preprocess_img(image, label, image_shape=IMG_SIZE):
     image = Data_augmentation(image)
     image = tf.image.resize(image, [image_shape, image_shape])
     return tf.cast(image, tf.float32), label
 
-
+# Function to zip and upload preprocessed images to GCS
 def create_zip_and_upload(ds, ds_info, split):
     zip_buffer = io.BytesIO()
-    seen_files = set() # Keep track of generated file names to avoid duplicates
+
+    # Keep track of generated file names to avoid duplicates
+    seen_files = set() 
 
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
         for img_batch_idx, (img_batch, label_batch) in enumerate(ds): 
             for img_idx, (img, label) in enumerate(zip(img_batch, label_batch)):
                 label_str = ds_info.features['label'].int2str(label.numpy())
-                while True: # Loop until we generate a unique file name
+                # Loop until we generate a unique file name
+                while True: 
                     file_name = f"{split}/{label_str}/{img_batch_idx}_{img_idx}_{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
                     if file_name not in seen_files:
                         break
@@ -58,9 +65,10 @@ def create_zip_and_upload(ds, ds_info, split):
     client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS)
     bucket = client.get_bucket(BUCKET_NAME)
     blob = bucket.blob(blob_name)
-    blob.chunk_size = 5 * 1024 * 1024  # 5 MB
+    blob.chunk_size = 5 * 1024 * 1024
     blob.upload_from_file(zip_buffer, content_type='application/zip')
 
+# Driver function that downloads and calls preprocess_img
 def preprocess_data():
     (ds_train, ds_val, ds_test), ds_info = tfds.load(
         'food101',
@@ -82,6 +90,7 @@ def preprocess_data():
     create_zip_and_upload(ds_val, ds_info, 'val')
     create_zip_and_upload(ds_test, ds_info, 'test')
 
+# Function to download the nutrients dataset
 def download_nutrients_dataset(url, local_path):
     if os.path.exists(local_path):
         os.remove(local_path)
@@ -92,6 +101,7 @@ def download_nutrients_dataset(url, local_path):
     with open(local_path, "wb") as f:
         f.write(response.content)
 
+# Function to upload nutrients dataset to GCS
 def upload_nutrients_to_gcs(bucket_name, source_file, destination_blob_name):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
