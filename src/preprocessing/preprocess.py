@@ -10,7 +10,7 @@ import requests
 import io
 
 # Constants
-IMG_SIZE = 128
+IMG_SIZE = 256
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 dataset_url = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
@@ -31,13 +31,20 @@ def preprocess_img(image, label, image_shape=IMG_SIZE):
     image = tf.image.resize(image, [image_shape, image_shape])
     return tf.cast(image, tf.float32), label
 
+
 def create_zip_and_upload(ds, ds_info, split):
     zip_buffer = io.BytesIO()
+    seen_files = set() # Keep track of generated file names to avoid duplicates
+
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for img_batch, label_batch in ds:
-            for img, label in zip(img_batch, label_batch):
+        for img_batch_idx, (img_batch, label_batch) in enumerate(ds): 
+            for img_idx, (img, label) in enumerate(zip(img_batch, label_batch)):
                 label_str = ds_info.features['label'].int2str(label.numpy())
-                file_name = f"{split}/{label_str}/{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
+                while True: # Loop until we generate a unique file name
+                    file_name = f"{split}/{label_str}/{img_batch_idx}_{img_idx}_{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
+                    if file_name not in seen_files:
+                        break
+                seen_files.add(file_name)
                 
                 # Cast the image to uint8 before encoding
                 img_uint8 = tf.cast(img, tf.uint8)
