@@ -34,7 +34,7 @@ def preprocess_img(image, label, image_shape=IMG_SIZE):
 def create_zip_and_upload(ds, ds_info, split):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for img_batch, label_batch in ds.take(1):
+        for img_batch, label_batch in ds:
             for img, label in zip(img_batch, label_batch):
                 label_str = ds_info.features['label'].int2str(label.numpy())
                 file_name = f"{split}/{label_str}/{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
@@ -51,6 +51,7 @@ def create_zip_and_upload(ds, ds_info, split):
     client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS)
     bucket = client.get_bucket(BUCKET_NAME)
     blob = bucket.blob(blob_name)
+    blob.chunk_size = 5 * 1024 * 1024  # 5 MB
     blob.upload_from_file(zip_buffer, content_type='application/zip')
 
 def preprocess_data():
@@ -92,7 +93,7 @@ def upload_nutrients_to_gcs(bucket_name, source_file, destination_blob_name):
     os.remove(source_file)
 
 if __name__ == "__main__":
-    #preprocess_data()
+    preprocess_data()
     download_nutrients_dataset(dataset_url, local_file_path)
     upload_nutrients_to_gcs(BUCKET_NAME, local_file_path, gcs_object_name)
     print(f"Preprocessed and augmented data uploaded to GCS bucket {BUCKET_NAME}.")
