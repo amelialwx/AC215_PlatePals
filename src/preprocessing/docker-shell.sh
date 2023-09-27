@@ -3,9 +3,6 @@
 # exit immediately if a command exits with a non-zero status
 set -e
 
-# Define some environment variables
-# Automatic export to the environment of subsequently executed commands
-# source: the command 'help export' run in Terminal
 export IMAGE_NAME="preprocessing-preprocess-image"
 export BASE_DIR=$(pwd)
 export SECRETS_DIR=$(pwd)/../../../secrets/
