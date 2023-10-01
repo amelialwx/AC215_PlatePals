@@ -1,66 +1,86 @@
+import os
+import zipfile
+import io
+import requests
 import tensorflow as tf
 import tensorflow_datasets as tfds
 from tensorflow.keras.layers.experimental import preprocessing
-import os
 from google.cloud import storage
-from PIL import Image
-import numpy as np
-import zipfile
-import requests
-import io
 
-# Constants
 IMG_SIZE = 128
 
 # GCS
 BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 
-# Nutrients dataset
-dataset_url = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
-gcs_object_name, local_file_path = "nutrients.csv"
+# Constants for nutrients dataset
+NUTRIENTS_URL = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
+LOCAL_PATH, GCS_OBJECT_NAME = "nutrients.csv", "nutrients.csv"
+DATA_VERSION = "version2" # UPDATE THIS IF NEEDED
 
-# Data augmentation layer
-Data_augmentation = tf.keras.Sequential([
-    preprocessing.RandomFlip('horizontal'),
-    preprocessing.RandomRotation(0.2),
-    preprocessing.RandomZoom(0.2),
-    preprocessing.RandomHeight(0.2),
-    preprocessing.RandomWidth(0.2)
-], name="data_augmentation")
 
-# Function to preprocess image
-def preprocess_img(image, label, image_shape=IMG_SIZE):
-    image = Data_augmentation(image)
-    image = tf.image.resize(image, [image_shape, image_shape])
+def data_augmentation_layer():
+    """Create a Keras Sequential model for data augmentation."""
+    return tf.keras.Sequential([
+        preprocessing.RandomFlip('horizontal'),
+        preprocessing.RandomRotation(0.2),
+        preprocessing.RandomZoom(0.2),
+        preprocessing.RandomHeight(0.2),
+        preprocessing.RandomWidth(0.2)
+    ], name="data_augmentation")
+
+
+def preprocess_img(image, label, img_size=IMG_SIZE, augment_layer=None):
+    """Preprocess image and label."""
+    if augment_layer:
+        image = augment_layer(image)
+    image = tf.image.resize(image, [img_size, img_size])
     return tf.cast(image, tf.float32), label
+
+
+def fetch_and_process_dataset(split_list, ds_info, augment_layer):
+    """Fetch and preprocess dataset given a list of splits (train, val, test etc.)."""
+    split_to_name = {
+        'train': 'train',
+        'validation[:40%]': 'val',
+        'validation[40%:]': 'test'
+    }
+    
+    datasets = {}
+    for tfds_split, custom_split in split_to_name.items():
+        ds = tfds.load('food101', split=tfds_split, as_supervised=True)
+        ds = ds.map(lambda img, lbl: preprocess_img(img, lbl, augment_layer=augment_layer),
+                    num_parallel_calls=tf.data.AUTOTUNE)
+        ds = ds.shuffle(buffer_size=1000).batch(batch_size=32).prefetch(tf.data.AUTOTUNE)
+        datasets[custom_split] = ds
+
+    for custom_split, ds in datasets.items():
+        create_zip_and_upload(ds, ds_info, custom_split)
+
 
 # Function to zip and upload preprocessed images to GCS
 def create_zip_and_upload(ds, ds_info, split):
     zip_buffer = io.BytesIO()
-
     # Keep track of generated file names to avoid duplicates
-    seen_files = set() 
-
+    seen_files = set()
+    
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
         for img_batch_idx, (img_batch, label_batch) in enumerate(ds): 
             for img_idx, (img, label) in enumerate(zip(img_batch, label_batch)):
                 label_str = ds_info.features['label'].int2str(label.numpy())
                 # Loop until we generate a unique file name
-                while True: 
+                while True:
                     file_name = f"{split}/{label_str}/{img_batch_idx}_{img_idx}_{tf.random.uniform(shape=[], minval=1, maxval=int(1e7), dtype=tf.int32)}.jpg"
                     if file_name not in seen_files:
                         break
                 seen_files.add(file_name)
-                
                 # Cast the image to uint8 before encoding
                 img_uint8 = tf.cast(img, tf.uint8)
                 img_encoded = tf.image.encode_jpeg(img_uint8)
-                
                 zf.writestr(file_name, img_encoded.numpy())
-
+    
     zip_buffer.seek(0)
-    blob_name = f"{split}.zip"
+    blob_name = f"{DATA_VERSION}/{split}.zip"
 
     client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS)
     bucket = client.get_bucket(BUCKET_NAME)
@@ -68,27 +88,6 @@ def create_zip_and_upload(ds, ds_info, split):
     blob.chunk_size = 5 * 1024 * 1024
     blob.upload_from_file(zip_buffer, content_type='application/zip')
 
-# Driver function that downloads and calls preprocess_img
-def preprocess_data():
-    (ds_train, ds_val, ds_test), ds_info = tfds.load(
-        'food101',
-        split=['train', 'validation[:40%]', 'validation[40%:]'],
-        shuffle_files=True,
-        as_supervised=True,
-        with_info=True,
-    )
-
-    ds_train = ds_train.map(preprocess_img, num_parallel_calls=tf.data.AUTOTUNE)
-    ds_val = ds_val.map(preprocess_img, num_parallel_calls=tf.data.AUTOTUNE)
-    ds_test = ds_test.map(preprocess_img, num_parallel_calls=tf.data.AUTOTUNE)
-
-    ds_train = ds_train.shuffle(buffer_size=1000).batch(batch_size=32).prefetch(tf.data.AUTOTUNE)
-    ds_val = ds_val.batch(batch_size=32).prefetch(buffer_size=1000)
-    ds_test = ds_test.batch(batch_size=32).prefetch(buffer_size=1000)
-
-    create_zip_and_upload(ds_train, ds_info, 'train')
-    create_zip_and_upload(ds_val, ds_info, 'val')
-    create_zip_and_upload(ds_test, ds_info, 'test')
 
 # Function to download the nutrients dataset
 def download_nutrients_dataset(url, local_path):
@@ -101,16 +100,21 @@ def download_nutrients_dataset(url, local_path):
     with open(local_path, "wb") as f:
         f.write(response.content)
 
+
 # Function to upload nutrients dataset to GCS
 def upload_nutrients_to_gcs(bucket_name, source_file, destination_blob_name):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
+    blob = bucket.blob(f"{DATA_VERSION}/{destination_blob_name}")  
     blob.upload_from_filename(source_file)
     os.remove(source_file)
 
+
 if __name__ == "__main__":
-    preprocess_data()
-    download_nutrients_dataset(dataset_url, local_file_path)
-    upload_nutrients_to_gcs(BUCKET_NAME, local_file_path, gcs_object_name)
+    augment_layer = data_augmentation_layer()
+    ds_info = tfds.builder('food101').info
+    fetch_and_process_dataset(['train', 'validation[:40%]', 'validation[40%:]'], ds_info, augment_layer)
+
+    download_nutrients_dataset(NUTRIENTS_URL, LOCAL_PATH)
+    upload_nutrients_to_gcs(BUCKET_NAME, LOCAL_PATH, GCS_OBJECT_NAME)
     print(f"Preprocessed and augmented data uploaded to GCS bucket {BUCKET_NAME}.")

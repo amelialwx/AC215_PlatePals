@@ -1,0 +1,5 @@
+[core]
+    remote = platepals_remote
+['remote "platepals_remote"']
+    url = gs://platepals_data/version2
+    credentialpath = ../secrets/data-service-account.json
