@@ -1,0 +1,14 @@
+md5: 6284454839819ee2ff0f9353bbd915ae
+frozen: true
+deps:
+- md5: 0a3889c39a1c83cd0fecfb61ee156fd1.dir
+  size: 1039977095
+  nfiles: 4
+  hash: md5
+  path: gs://platepals_data/version2
+outs:
+- md5: 778e63bd047f8cfe5544886e7233b266.dir
+  size: 1039977095
+  nfiles: 4
+  hash: md5
+  path: version2
