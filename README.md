@@ -73,10 +73,25 @@ Running our code
 **Execute Dockerfile**
 1. Make sure the Docker application is operational.
 2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
-3. Upon completion, your GCS Bucket should display the processed data as shown.
+3. Upon completion, your GCS Bucket should display the processed data as shown under the default folder name "version1".
 ![bucket-data](assets/bucket-data.png)
 
-#### Challenges and Future Directions
+DVC Setup
+------------
+This step is entirely optional.
+1. Make sure dvc[gs] is installed by running `pip install dvc[gs]`.
+2. Initialize git at the root of the file by running `git init`.
+3. Initialize dvc at the root of the file by running `dvc init`.
+2. Ensure that the gcloud CLI is installed by running a gcloud command e.g. `gcloud projects list`. [Instructions](https://cloud.google.com/sdk/docs/install) for installation can be found here.
+3. Run the command `gcloud auth application-default login` to be authenticated with the gcloud CLI.
+4. Run the command `dvc import-url gs://{GCS_BUCKET_NAME}/version1`.
+5. Run the command `git add .gitignore version1.dvc`
+6. Run `git commit -m "added raw data"`.
+9. You have now committed the latest version of the data using dvc.
+
+
+Challenges and Future Directions
+------------
 
 1. **Data Transfer Time**: We've observed that the data download and upload process currently takes between 2-3 hours. Although we've optimized the process to some extent, we aim to investigate further to determine whether these durations can be shortened. This is on our agenda for the next milestone.
 
