@@ -1,4 +1,4 @@
-AC215 - Milestone 2 (PlatePals)
+AC215 - Milestone 3 (PlatePals)
 ==============================
 **Team Members**
 
