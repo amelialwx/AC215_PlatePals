@@ -95,6 +95,7 @@ print("All Physical Devices", tf.config.list_physical_devices())
 
 def download_blob(bucket_name, source_blob_name, destination_file_name):
     """Downloads a blob from the bucket."""
+    from google.cloud import storage
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(source_blob_name)
@@ -146,7 +147,7 @@ start_time = time.time()
 #     base_path="datasets",
 #     extract=True,
 # )
-bucket_name = os.environ.get('GCS_BUCKET_DATA_URI', 'default-bucket-name')
+bucket_name = "platepals_data"
 data_version = "preprocessed_data"  # Example version
 splits = ['train', 'val', 'test']  # Example splits
 
