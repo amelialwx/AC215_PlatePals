@@ -6,7 +6,6 @@ import google.cloud.aiplatform as aip
 GCP_PROJECT = os.environ["GCP_PROJECT"]
 GCP_REGION = os.environ["GCP_REGION"]
 GCS_BUCKET_URI = os.environ["GCS_BUCKET_URI"]
-GCS_BUCKET_DATA_URI = os.environ["GCS_BUCKET_DATA_URI"]
 
 
 def generate_uuid(length: int = 8) -> str:
