@@ -1,22 +1,25 @@
-# Start from an NVIDIA-aware base image.
-FROM nvidia/cuda:11.2.2-cudnn8-devel-ubuntu20.04 as base
+# Use the official Debian-hosted Python image
+FROM python:3.9-slim-buster
 
-# Install Python 3.9 and other dependencies.
-FROM base as python
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y python3.9 python3-pip && \
-    python3.9 -m pip install --upgrade pip && \
-    ln -s /usr/bin/python3.9 /usr/bin/python  # Symlink python to python3.9
-
-# Copy requirements and install Python packages.
-FROM python as dependencies
-COPY requirements.txt /
-RUN pip install --no-cache-dir -r /requirements.txt
-
-# Final image
-FROM dependencies as final
+# Set the working directory
 WORKDIR /app
-COPY . /app
 
-# Your entry point
+# Tell pipenv where the shell is. 
+ENV PYENV_SHELL=/bin/bash
+
+# Ensure we have an up-to-date baseline, install dependencies
+RUN set -ex && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends build-essential git && \
+    pip install --no-cache-dir --upgrade pip
+
+# Copy requirements and install Python packages
+COPY requirements.txt /
+RUN pip install -r /requirements.txt
+
+# Add everything
+ADD . /app
+
+# Entry point
 ENTRYPOINT ["/bin/bash", "./docker-entrypoint.sh"]
