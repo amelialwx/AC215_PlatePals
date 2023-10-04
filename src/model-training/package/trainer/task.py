@@ -141,22 +141,21 @@ def download_and_unzip_from_gcs(bucket_name, blob_name, destination_path):
 
 
 # Download Data
-start_time = time.time()
 # download_file(
 #     "https://github.com/dlops-io/datasets/releases/download/v1.0/mushrooms_3_labels.zip",
 #     base_path="datasets",
 #     extract=True,
 # )
 bucket_name = "platepals_data"
-data_version = "preprocessed_data"  # Example version
-splits = ['train', 'val', 'test']  # Example splits
+data_version = "preprocessed_data"
+splits = ['train', 'val', 'test']
 
+start_time = time.time()
 # Ensure that destination directories exist or create them
 for split in splits:
     destination_path = os.path.join('./data', split)
     os.makedirs(destination_path, exist_ok=True)
     
-    # Construct the blob name according to your previous structure
     blob_name = f"{data_version}/{split}.zip"
     
     # Download and unzip
@@ -164,26 +163,38 @@ for split in splits:
 end_time = time.time()
 duration = (end_time - start_time) / 60
 print(f"Download execution time {duration} minutes.")
-# # Load Data
-# base_path = os.path.join("datasets", "mushrooms")
-# label_names = os.listdir(base_path)
-# print("Labels:", label_names)
+# Load data for train
+base_path_train = os.path.join("./data", "train", "train")
+print(base_path_train)
+label_names = os.listdir(base_path_train)
+print("Labels:", label_names)
 
-# # Number of unique labels
-# num_classes = len(label_names)
-# # Create label index for easy lookup
-# label2index = dict((name, index) for index, name in enumerate(label_names))
-# index2label = dict((index, name) for index, name in enumerate(label_names))
+# Number of unique labels for train data
+num_classes = len(label_names)
+# Create label index for easy lookup
+label2index = dict((name, index) for index, name in enumerate(label_names))
+index2label = dict((index, name) for index, name in enumerate(label_names))
 
-# # Generate a list of labels and path to images
-# data_list = []
-# for label in label_names:
-#     # Images
-#     image_files = os.listdir(os.path.join(base_path, label))
-#     data_list.extend([(label, os.path.join(base_path, label, f)) for f in image_files])
+# Generate a list of labels and path to images for train
+data_list_train = []
+for label in label_names:
+    # Images
+    image_files = os.listdir(os.path.join(base_path, label))
+    data_list_train.extend([(label, os.path.join(base_path_train, label, f)) for f in image_files])
 
-# print("Full size of the dataset:", len(data_list))
-# print("data_list:", data_list[:5])
+# Load data for val
+base_path_val = os.path.join("./data", "train", "val")
+# Generate a list of labels and path to images for val
+data_list_val = []
+for label in label_names:
+    image_files = os.listdir(os.path.join(base_path, label))
+    data_list_val.extend([(label, os.path.join(base_path_val, label, f)) for f in image_files])
+
+print("Full size of the train dataset:", len(data_list_train))
+print("data_list_train:", data_list_train[:5])
+
+print("Full size of the val dataset:", len(data_list_val))
+print("data_list_val:", data_list_val[:5])
 
 # # Load X & Y
 # # Build data x, y
