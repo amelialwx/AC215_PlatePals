@@ -7,6 +7,5 @@ gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
 # Set GCP Project Details
 gcloud config set project $GCP_PROJECT
 
-
 #/bin/bash
 pipenv shell
