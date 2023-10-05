@@ -19,19 +19,14 @@ fi
 
 # Build the image based on the Dockerfile
 docker build -t $IMAGE_NAME -f Dockerfile .
+# M1/2 chip macs use this line
+# docker build -t $IMAGE_NAME --platform=linux/arm64/v8 -f Dockerfile .
 
 echo "Host GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
-# Check if system has NVIDIA GPUs
-if nvidia-smi > /dev/null 2>&1; then
-    GPU_FLAGS="--gpus all"
-else
-    GPU_FLAGS=""
-fi
-
 # Run the container
 # Run Docker with an initial command to check for the secret before proceeding
-docker run --rm --name $IMAGE_NAME -i $GPU_FLAGS \
+docker run --rm --name $IMAGE_NAME -i \
 --mount type=bind,source="$BASE_DIR",target=/app \
 --mount type=bind,source="$SECRETS_DIR",target=/secrets \
 -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
