@@ -52,17 +52,22 @@ parser.add_argument(
     "--batch_size", dest="batch_size", default=16, type=int, help="Size of a batch."
 )
 parser.add_argument(
-    "--wandb_key", dest="wandb_key", default="16", type=str, help="WandB API Key"
+    "--wandb_key", dest="wandb_key", default="16", type=str, help="WandB API key."
+)
+parser.add_argument(
+    "--bucket_name", dest="bucket_name", default="default_bucket_name", type=str, help="GCS bucket name."
 )
 args = parser.parse_args()
 
 # TF Version
 print("tensorflow version", tf.__version__)
 print("Eager Execution Enabled:", tf.executing_eagerly())
+
 # Get the number of replicas
 strategy = tf.distribute.MirroredStrategy()
 print("Number of replicas:", strategy.num_replicas_in_sync)
 
+# See number of devices
 devices = tf.config.experimental.get_visible_devices()
 print("Devices:", devices)
 print(tf.config.experimental.list_logical_devices("GPU"))
@@ -70,15 +75,6 @@ print(tf.config.experimental.list_logical_devices("GPU"))
 print("GPU Available: ", tf.config.list_physical_devices("GPU"))
 print("All Physical Devices", tf.config.list_physical_devices())
 
-def download_blob(bucket_name, source_blob_name, destination_file_name):
-    """Downloads a blob from the bucket."""
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(source_blob_name)
-
-    blob.download_to_filename(destination_file_name)
-
-    print(f"Blob {source_blob_name} downloaded to {destination_file_name}.")
 
 def download_and_unzip_from_gcs(bucket_name, blob_name, destination_path):
     """
@@ -116,25 +112,27 @@ def download_and_unzip_from_gcs(bucket_name, blob_name, destination_path):
 
 # Download Data
 start_time = time.time()
-#bucket_name = os.environ.get('GCS_BUCKET_URI', 'default-bucket-name')
-bucket_name = "platepals_trainer_zqiu"
-data_version = "preprocessed_data"  # Example version
-splits = ['train', 'val', 'test']  # Example splits
+bucket_name = args.bucket_name
+data_version = "preprocessed_data" # CHANGE THIS
+splits = ['train', 'val', 'test'] 
 
 # Ensure that destination directories exist or create them
 for split in splits:
     destination_path = os.path.join('./data')
     os.makedirs(destination_path, exist_ok=True)
     
-    # Construct the blob name according to your previous structure
+    # Construct the blob name
     blob_name = f"{data_version}/{split}.zip"
     
     # Download and unzip
     download_and_unzip_from_gcs(bucket_name, blob_name, destination_path)
+
 end_time = time.time()
 duration = (end_time - start_time) / 60
 print(f"Download execution time {duration} minutes.")
 
+
+# Function to create image paths and labels
 def gather_data_from_directory(data_dir):
     image_paths = []
     labels = []
@@ -152,6 +150,8 @@ def gather_data_from_directory(data_dir):
 
     return image_paths, labels
 
+
+# Function to turn labels into indexes
 def encode_labels(labels):
     unique_labels = sorted(set(labels))
     label2index = {label: index for index, label in enumerate(unique_labels)}
@@ -159,18 +159,22 @@ def encode_labels(labels):
 
     return encoded_labels, label2index
 
+# Obtain data
 train_x, train_y = gather_data_from_directory("./data/train")
 val_x, val_y = gather_data_from_directory("./data/val")
 test_x, test_y = gather_data_from_directory("./data/test")
 
+# Get all labels and indexed labels
 all_labels = train_y + val_y + test_y
 all_encoded_labels, label2index = encode_labels(all_labels)
 
+# Filter for train and val labels and indexed labels
 train_y_encoded = all_encoded_labels[:len(train_y)]
 val_y_encoded = all_encoded_labels[len(train_y):len(train_y) + len(val_y)]
 test_y_encoded = all_encoded_labels[len(train_y) + len(val_y):]
 num_classes = len(label2index)
 
+# Sanity check
 print("train_x count:", len(train_x))
 print("validate_x count:", len(val_x))
 print("test_x count:", len(test_x))
@@ -179,6 +183,8 @@ print("total classes:", num_classes)
 # Login into wandb
 wandb.login(key=args.wandb_key)
 
+
+# Create TF Data
 def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32, num_classes = 101):
     # Load Image
     def load_image(path, label):
@@ -210,7 +216,6 @@ def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32
     validation_data = tf.data.Dataset.from_tensor_slices((val_x, val_y_encoded))
     test_data = tf.data.Dataset.from_tensor_slices((test_x, test_y_encoded))
 
-
     # Train data
     train_data = train_data.shuffle(buffer_size=train_shuffle_buffer_size)
     train_data = train_data.map(load_image, num_parallel_calls=tf.data.AUTOTUNE)
@@ -233,7 +238,8 @@ def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32
 
     return (train_data, validation_data, test_data)
 
-
+ 
+# MobileNet model
 def build_mobilenet_model(
     image_height, image_width, num_channels, num_classes, model_name, train_base=False
 ):
@@ -249,8 +255,8 @@ def build_mobilenet_model(
     tranfer_model_base.trainable = train_base
 
     # Regularize using L1
-    #kernel_weight = 0.02
-    #bias_weight = 0.02
+    # kernel_weight = 0.02
+    # bias_weight = 0.02
     kernel_weight = 0.0
     bias_weight = 0.0
 
@@ -276,6 +282,8 @@ def build_mobilenet_model(
 
     return model
 
+
+# Efficient net model
 def build_efficient_net(image_height, image_width, num_channels, num_classes, model_name, train_base = False):
 
     input_shape = (image_height,image_width,num_channels)
@@ -284,17 +292,18 @@ def build_efficient_net(image_height, image_width, num_channels, num_classes, mo
 
     # Create functional model
     inputs = keras.layers.Input(shape=input_shape, name= "input_layer")
-    # Note: Since EfficientNetBX models have rescaling no need to use preprocessing e.g. x= preprocessing.Rescaling(1/255.)
 
     x = base_model(inputs, training=False)
     x = keras.layers.GlobalAveragePooling2D()(x)
     x = keras.layers.Dense(num_classes)(x)
     outputs = keras.layers.Activation("softmax", dtype=tf.float32, name ="softmax_float32")(x)
     model = tf.keras.Model(inputs,outputs, name = model_name + "_train_base_" + str(train_base))
+
     #Get a summary of model
     return model
 
 
+# In class model
 def build_model_tfhub(
     image_height, image_width, num_channels, num_classes, model_name, train_base=False
 ):
@@ -444,6 +453,5 @@ print("Training execution time (mins)", execution_time)
 wandb.config.update({"execution_time": execution_time})
 # Close the W&B run
 wandb.run.finish()
-
 
 print("Training Job Complete")
