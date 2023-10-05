@@ -56,7 +56,7 @@ Project Organization
                 ├── preprocess.py
                 └── requirements.txt
                 
-Preprocess container
+Preprocess container (Milestone 2)
 ------------
 - This container ingests 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) and performs image preprocessing before uploading the modified data to a GCS Bucket.
 - It also fetches and uploads [nutritional data](https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv) as a CSV file to the same GCS Bucket.
@@ -69,7 +69,7 @@ Preprocess container
 
 (3) `src/preprocessing/Dockerfile`: The Dockerfile is configured to use `python:3.9-slim-buster`. It sets up volumes and uses secret keys (which should not be uploaded to GitHub) for connecting to the GCS Bucket.
 
-Model Training (Multi-class CNN)
+Model Training a Multi-Class CNN Model (Milestone 3)
 ------------
 - This container reads 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) from a GCS Bucket that we populated in the `Preprocess container` section.
 - It fits and tests EfficientNet, a CNN model, using the train-val-test split we created in in the `Preprocess container` section to our problem of classifying food images into the 101 labels. 
@@ -98,10 +98,14 @@ Running our code
 2. Search for "Buckets" from the top search box OR go to: "Cloud Storage" > "Buckets" and create a new bucket with an appropriate bucket name e.g. "platepals-test".
 3. Click done. This will create a new GCS Bucket.
 
-**Set GCP Credentials**
+**Set GCP Credentials (if running Milestone 2)**
 1. Head to src/preprocessing/docker-shell.sh.
 2. Replace `GCS_BUCKET_NAME` and `GCP_PROJECT` with corresponding GCS Bucket Name that you have chosen above and GCP Project Name.
 3. Repeat step 2 for src/preprocessing/docker-shell.bat.
+
+**Set GCP Credentials (if running Milestone 3)**
+1. Head to `src/model-training/docker-shell.sh`.
+2. Replace `GCS_BUCKET_NAME` and `GCP_PROJECT` with corresponding GCS Bucket Name that you have chosen above and GCP Project Name.
 
 **Execute Dockerfile (if running Milestone 2)**
 1. Make sure the Docker application is operational.
