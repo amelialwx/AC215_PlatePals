@@ -128,13 +128,13 @@ Results
 
 Below you can see the output from our Weights & Biases page. We used this tool to track several iterations of our model training when it trained our EfficientNet. It was tracked using the `wandb` library we included inside of our `task.py` script.
 
-![wnb](assets/wnb.png)
+![wnb](assets/wnb.jpg)
 
 **Serverless Training**
 
 Inside our training container, we used the Google Cloud SDK to launch training instances in the cloud, which was how we connected to the Weights & Biases in the image above. In the image below, you can see several runs of our model. We had a successful completion of the custom job.
 
-![vertex-ai-complete](assets/vertex-ai-complete.png)
+![vertex-ai-complete](assets/vertex-ai-complete.jpg)
 
 DVC Setup
 ------------
