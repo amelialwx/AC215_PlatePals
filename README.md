@@ -14,9 +14,11 @@ PlatePals
 
 The goal of this project is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with relevant nutritional information and personalized dietary recommendations. This project will involve key phases of data preprocessing, model development, and application interface development, leveraging TensorFlow's Food-101 dataset.
 
-### Milestone 2 ###
-
 We'll predominantly employ TensorFlow's Food-101 dataset, featuring 101,000 annotated food images across 101 categories. Additionally, we will correlate the identified food items with nutritional metrics obtained from Kaggle's Nutrition datasets and a database called Nutritional Facts for Most Common Foods, which together offer around 9,000 nutritional records. Our dataset is securely hosted in a private Google Cloud Bucket.
+
+### Milestone 3 ###
+
+In Milestone 3, we provide a container to read our training, validation, and testing dataset of the Food-101 dataset, featuring 101,000 annotated food images across 101 categories, from GCS bucket, fit a CNN model to it called EfficientNet through a custom job sent to GCP Vertex AI and model dashboard set up through Weights and Biases.
 
 Project Organization
 ------------
@@ -28,6 +30,26 @@ Project Organization
       ├── setup.py
       ├── reports
       └── src
+            |── model-training
+                ├── cli-multi-gpu.sh
+                ├── cli.py
+                ├── cli.sh
+                ├── docker-entrypoint.sh
+                ├── docker-shell.bat
+                ├── docker-shell.sh
+                ├── Dockerfile
+                ├── package-trainer.sh
+                ├── Pipfile
+                ├── Pipfile.lock
+                ├── trainer.tar.gz
+                └── package
+                    ├── PKG-INFO
+                    ├── setup.cfg
+                    ├── setup.py
+                    └── trainer
+                        ├── __init__.py
+                        ├── task_multi_gpu.py
+                        └── task.py
             |── preprocessing
                 ├── Dockerfile
                 ├── docker-entrypoint.sh
@@ -35,7 +57,8 @@ Project Organization
                 ├── docker-shell.sh
                 ├── preprocess.py
                 └── requirements.txt
-Preprocess container
+                
+Preprocess container (Milestone 2)
 ------------
 - This container ingests 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) and performs image preprocessing before uploading the modified data to a GCS Bucket.
 - It also fetches and uploads [nutritional data](https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv) as a CSV file to the same GCS Bucket.
@@ -47,6 +70,18 @@ Preprocess container
 (2) `src/preprocessing/requirements.txt`: Lists the Python packages essential for image preprocessing.
 
 (3) `src/preprocessing/Dockerfile`: The Dockerfile is configured to use `python:3.9-slim-buster`. It sets up volumes and uses secret keys (which should not be uploaded to GitHub) for connecting to the GCS Bucket.
+
+Model Training a Multi-Class CNN Model (Milestone 3)
+------------
+- This container reads 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) from a GCS Bucket that we populated in the `Preprocess container` section.
+- It fits and tests EfficientNet, a CNN model, using the train-val-test split we created in in the `Preprocess container` section to our problem of classifying food images into the 101 labels. 
+- The code to perform the the tasks is written in `task.py`.
+- The code is sent to GCP Vertex AI to run.
+- Our model is connected to Weights and Biases, so we are able to view the model's performance and metrics at every epoch in its training and testing.
+- Required inputs: GCS Project Name and GCS Bucket Name.
+- Output: Model output in Weights and Biases and Vertex AI
+
+(1) `src/model-training/package/trainer/task.py`: This file reads our food data, a 4.65GB dataset, from the GCS bucket, fits a CNN model for multi-class classification, and then evaluates in on a test dataset. Image dimensions are resized to 128x128 pixels.
 
 Running our code
 ------------
@@ -65,16 +100,27 @@ Running our code
 2. Search for "Buckets" from the top search box OR go to: "Cloud Storage" > "Buckets" and create a new bucket with an appropriate bucket name e.g. "platepals-test".
 3. Click done. This will create a new GCS Bucket.
 
-**Set GCP Credentials**
+**Set GCP Credentials (if running Milestone 2)**
 1. Head to src/preprocessing/docker-shell.sh.
 2. Replace `GCS_BUCKET_NAME` and `GCP_PROJECT` with corresponding GCS Bucket Name that you have chosen above and GCP Project Name.
 3. Repeat step 2 for src/preprocessing/docker-shell.bat.
 
-**Execute Dockerfile**
+**Set GCP Credentials (if running Milestone 3)**
+1. Head to `src/model-training/docker-shell.sh`.
+2. Replace `GCS_BUCKET_NAME` and `GCP_PROJECT` with corresponding GCS Bucket Name that you have chosen above and GCP Project Name.
+
+**Execute Dockerfile (if running Milestone 2)**
 1. Make sure the Docker application is operational.
 2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
 3. Upon completion, your GCS Bucket should display the processed data as shown under the default folder name "version1".
 ![bucket-data](assets/bucket-data.png)
+
+**Execute Dockerfile (if running Milestone 3)**
+1. Make sure the Docker application is operational.
+2. Navigate to `src/model-training/package/trainer` and execute `sh docker-shell.sh`.
+3. Inside Docker, run `sh package-trainer.sh`.
+4. Still inside Docker, run `sh cli.sh`.
+3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
 
 DVC Setup
 ------------
