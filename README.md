@@ -14,9 +14,11 @@ PlatePals
 
 The goal of this project is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with relevant nutritional information and personalized dietary recommendations. This project will involve key phases of data preprocessing, model development, and application interface development, leveraging TensorFlow's Food-101 dataset.
 
+We'll predominantly employ TensorFlow's Food-101 dataset, featuring 101,000 annotated food images across 101 categories. Additionally, we will correlate the identified food items with nutritional metrics obtained from Kaggle's Nutrition datasets and a database called Nutritional Facts for Most Common Foods, which together offer around 9,000 nutritional records. Our dataset is securely hosted in a private Google Cloud Bucket.
+
 ### Milestone 3 ###
 
-We'll predominantly employ TensorFlow's Food-101 dataset, featuring 101,000 annotated food images across 101 categories. Additionally, we will correlate the identified food items with nutritional metrics obtained from Kaggle's Nutrition datasets and a database called Nutritional Facts for Most Common Foods, which together offer around 9,000 nutritional records. Our dataset is securely hosted in a private Google Cloud Bucket.
+In Milestone 3, we provide a container to read our training, validation, and testing dataset of the Food-101 dataset, featuring 101,000 annotated food images across 101 categories, from GCS bucket, fit a CNN model to it called EfficientNet through a custom job sent to GCP Vertex AI and model dashboard set up through Weights and Biases.
 
 Project Organization
 ------------
