@@ -19,6 +19,7 @@ export CMDARGS="--model_name=EfficientNetV2B0,--epochs=3,--batch_size=32,--wandb
 #export CMDARGS="--model_name=tfhub_mobilenetv2,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
 #export CMDARGS="--model_name=tfhub_mobilenetv2,--train_base,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
 
+# Run training with GPU
 # gcloud ai custom-jobs create \
 #   --region=$GCP_REGION \
 #   --display-name=$DISPLAY_NAME \

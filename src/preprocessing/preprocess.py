@@ -16,7 +16,7 @@ GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'
 # Constants for nutrients dataset
 NUTRIENTS_URL = "https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv"
 LOCAL_PATH, GCS_OBJECT_NAME = "nutrients.csv", "nutrients.csv"
-DATA_VERSION = "version2" # UPDATE THIS IF NEEDED
+DATA_VERSION = "preprocessed_data" # CHANGE THIS
 
 
 def data_augmentation_layer():
