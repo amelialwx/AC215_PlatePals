@@ -12,7 +12,8 @@ export ACCELERATOR_TYPE="NVIDIA_TESLA_T4"
 export ACCELERATOR_COUNT=2
 export GCP_REGION="us-central1" # Adjust region based on you approved quotas for GPUs
 
-export CMDARGS="--model_name=mobilenetv2,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
+#export CMDARGS="--model_name=mobilenetv2,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
+export CMDARGS="--model_name=EfficientNetV2B0,--epochs=3,--batch_size=32,--wandb_key=$WANDB_KEY,--bucket_name=$GCS_BUCKET_NAME"
 #export CMDARGS="--model_name=mobilenetv2,--train_base,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
 #export CMDARGS="--model_name=tfhub_mobilenetv2,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
 #export CMDARGS="--model_name=tfhub_mobilenetv2,--train_base,--epochs=30,--batch_size=32,--wandb_key=$WANDB_KEY"
