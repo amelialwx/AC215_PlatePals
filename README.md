@@ -14,7 +14,7 @@ PlatePals
 
 The goal of this project is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with relevant nutritional information and personalized dietary recommendations. This project will involve key phases of data preprocessing, model development, and application interface development, leveraging TensorFlow's Food-101 dataset.
 
-### Milestone 2 ###
+### Milestone 3 ###
 
 We'll predominantly employ TensorFlow's Food-101 dataset, featuring 101,000 annotated food images across 101 categories. Additionally, we will correlate the identified food items with nutritional metrics obtained from Kaggle's Nutrition datasets and a database called Nutritional Facts for Most Common Foods, which together offer around 9,000 nutritional records. Our dataset is securely hosted in a private Google Cloud Bucket.
 
@@ -28,6 +28,26 @@ Project Organization
       ├── setup.py
       ├── reports
       └── src
+            |── model-training
+                ├── cli-multi-gpu.sh
+                ├── cli.py
+                ├── cli.sh
+                ├── docker-entrypoint.sh
+                ├── docker-shell.bat
+                ├── docker-shell.sh
+                ├── Dockerfile
+                ├── package-trainer.sh
+                ├── Pipfile
+                ├── Pipfile.lock
+                ├── trainer.tar.gz
+                └── package
+                    ├── PKG-INFO
+                    ├── setup.cfg
+                    ├── setup.py
+                    └── trainer
+                        ├── __init__.py
+                        ├── task_multi_gpu.py
+                        └── task.py
             |── preprocessing
                 ├── Dockerfile
                 ├── docker-entrypoint.sh
@@ -35,18 +55,15 @@ Project Organization
                 ├── docker-shell.sh
                 ├── preprocess.py
                 └── requirements.txt
-Preprocess container
+                
+Model Training (Multi-class CNN)
 ------------
 - This container ingests 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) and performs image preprocessing before uploading the modified data to a GCS Bucket.
 - It also fetches and uploads [nutritional data](https://raw.githubusercontent.com/prasertcbs/basic-dataset/master/nutrients.csv) as a CSV file to the same GCS Bucket.
 - Required inputs: GCS Project Name and GCS Bucket Name.
 - Output: Processed data stored in the GCS Bucket.
 
-(1) `src/preprocessing/preprocess.py`: This file manages the preprocessing of our 4.65GB dataset. Image dimensions are resized to 128x128 pixels to expedite subsequent processing. We apply random transformations such as horizontal flips, rotations, and zooms. These preprocessed images are batch-processed and uploaded to the GCS Bucket as a zip file.
-
-(2) `src/preprocessing/requirements.txt`: Lists the Python packages essential for image preprocessing.
-
-(3) `src/preprocessing/Dockerfile`: The Dockerfile is configured to use `python:3.9-slim-buster`. It sets up volumes and uses secret keys (which should not be uploaded to GitHub) for connecting to the GCS Bucket.
+(1) `src/model-training/package/trainer/task.py`: This file reads our food data, a 4.65GB dataset, from the GCS bucket, fits a CNN model for multi-class classification, and then evaluates in on a test dataset. Image dimensions are resized to 128x128 pixels.
 
 Running our code
 ------------
