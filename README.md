@@ -209,10 +209,10 @@ docker-shell.sh
 9. Run `sudo sh docker-shell.sh`
 10. Run these commands in the docker container for DVC
 ```   
-mkdir mushdvc
-gcsfuse mushdvc mushdvc/
+mkdir dvc
+gcsfuse {GCS_BUCKET_NAME}/preprocessed dvc/
 dvc init
-dvc remote add -d mushdvc gs://mushdvc/dvc_store
+dvc remote add -d dvc gs://{GCS_BUCKET_NAME}/dvc_store
 dvc add mushdvc  
 dvc push
 
