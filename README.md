@@ -89,7 +89,7 @@ Model Training a Multi-Class CNN Model (Milestone 3)
 
 (1) `src/model-training/package/trainer/task.py`: This file reads our food data, a 4.65GB dataset, from the GCS bucket, fits a CNN model for multi-class classification, and then evaluates in on a test dataset. Image dimensions are resized to 128x128 pixels.
 
-Distilling our CNN Model and Integrating Kubeflow (Milestone 3)
+Distilling our CNN Model and Integrating Kubeflow (Milestone 4)
 ------------
 TODO
 
