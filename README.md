@@ -20,9 +20,13 @@ We'll predominantly employ TensorFlow's Food-101 dataset, featuring 101,000 anno
 
 In milestone 2, we provide a container that pulls data from the TensorFlow [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101), performs train-validation-test split of 75%, 10%, and 15% respsectively, and uploads the files onto our remote GCS bucket as zip files. 
 
-**Milestone 3**
+**Recap of Milestone 3**
 
 In this milestone, we provide a container to read our training, validation, and testing dataset from our remote GCS bucket, fit a CNN model to called EfficientNetV2B0 through a custom job sent to [GCP Vertex AI](https://console.cloud.google.com/vertex-ai/training/custom-jobs) and model dashboard set up through [Weights and Biases](https://wandb.ai/).
+
+**Milestone 4**
+
+In this milestone, we distilled our CNN model called EfficientNetV2B0 and provided performance benchmarks and analysis. Furthermore, we documented the successful integration of Vertex AI Pipelines (Kubeflow) for machine learning orchestration and cloud functions for process automation.
 
 Project Organization
 ------------
@@ -84,6 +88,10 @@ Model Training a Multi-Class CNN Model (Milestone 3)
 - Output: Model output in Weights and Biases and Vertex AI
 
 (1) `src/model-training/package/trainer/task.py`: This file reads our food data, a 4.65GB dataset, from the GCS bucket, fits a CNN model for multi-class classification, and then evaluates in on a test dataset. Image dimensions are resized to 128x128 pixels.
+
+Distilling our CNN Model and Integrating Kubeflow (Milestone 3)
+------------
+TODO
 
 Running our code
 ------------
@@ -152,6 +160,9 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 4. **NOTE: EXECUTION MAY TAKE 15 MINUTES TO 1 AN HOUR DEPENDING ON GPU/CPU.** Still inside the docker container, run `sh cli.sh`.
 3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+
+### Milestone 4 (distilling CNN Model) ###
+TODO
 
 Results
 ------------
