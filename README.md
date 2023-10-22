@@ -51,7 +51,6 @@ Project Organization
                     ├── setup.py
                     └── trainer
                         ├── __init__.py
-                        ├── task_multi_gpu.py
                         └── task.py
             |── preprocessing
                 ├── Dockerfile
