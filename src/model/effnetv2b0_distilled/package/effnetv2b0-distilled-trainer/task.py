@@ -24,6 +24,14 @@ import tensorflow_hub as hub
 import wandb
 from wandb.keras import WandbCallback, WandbMetricsLogger
 
+# Evaluation
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import decimal
+from glob import glob
+import json
+
 
 # Setup the arguments for the trainer task
 parser = argparse.ArgumentParser()
@@ -201,16 +209,6 @@ def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32
     train_shuffle_buffer_size = len(train_x)
     validation_shuffle_buffer_size = len(val_x)
 
-    # Converts to y to binary class matrix (One-hot-encoded)
-    #train_processed_y = to_categorical(train_y_encoded, num_classes=num_classes, dtype="float32")
-    #validate_processed_y = to_categorical(val_y_encoded, num_classes=num_classes, dtype="float32")
-    #test_processed_y = to_categorical(test_y_encoded, num_classes=num_classes, dtype="float32")
-
-    # Create TF Dataset
-    # train_data = tf.data.Dataset.from_tensor_slices((train_x, train_processed_y))
-    # validation_data = tf.data.Dataset.from_tensor_slices((val_x, validate_processed_y))
-    # test_data = tf.data.Dataset.from_tensor_slices((test_x, test_processed_y))
-
     # Create TF Dataset
     train_data = tf.data.Dataset.from_tensor_slices((train_x, train_y_encoded))
     validation_data = tf.data.Dataset.from_tensor_slices((val_x, val_y_encoded))
@@ -219,26 +217,139 @@ def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32
     # Train data
     train_data = train_data.shuffle(buffer_size=train_shuffle_buffer_size)
     train_data = train_data.map(load_image, num_parallel_calls=tf.data.AUTOTUNE)
-    #train_data = train_data.map(normalize, num_parallel_calls=tf.data.AUTOTUNE)
-    train_data = train_data.batch(batch_size)
+    # train_data = train_data.map(normalize, num_parallel_calls=tf.data.AUTOTUNE)
+    train_data = train_data.batch(batch_size, drop_remainder=True)
     train_data = train_data.prefetch(tf.data.AUTOTUNE)
 
     # Validation data
     validation_data = validation_data.shuffle(buffer_size=validation_shuffle_buffer_size)
     validation_data = validation_data.map(load_image, num_parallel_calls=tf.data.AUTOTUNE)
-    #validation_data = validation_data.map(normalize, num_parallel_calls=tf.data.AUTOTUNE)
-    validation_data = validation_data.batch(batch_size)
+    # validation_data = validation_data.map(normalize, num_parallel_calls=tf.data.AUTOTUNE)
+    validation_data = validation_data.batch(batch_size, drop_remainder=True)
     validation_data = validation_data.prefetch(tf.data.AUTOTUNE)
 
     # Test data
     test_data = test_data.map(load_image, num_parallel_calls=tf.data.AUTOTUNE)
-    #test_data = test_data.map(normalize, num_parallel_calls=tf.data.AUTOTUNE)
-    test_data = test_data.batch(batch_size)
+    # test_data = test_data.map(normalize, num_parallel_calls=tf.data.AUTOTUNE)
+    test_data = test_data.batch(batch_size, drop_remainder=True)
     test_data = test_data.prefetch(tf.data.AUTOTUNE)
+
+    print(f'len(train_x): {len(train_x)}')
+    print(f'len(test_data): {len(train_data)}')
 
     return (train_data, validation_data, test_data)
 
+
+class JsonEncoder(json.JSONEncoder):
+  def default(self, obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return super(JsonEncoder, self).default(obj)
+
+
+experiment_name = "models"
+def save_model(model, model_train_history, execution_time, learning_rate, epochs, optimizer, evaluation_results):
+    model_name=model.name
+
+    # Ensure path exists
+    if not os.path.exists(experiment_name):
+        os.mkdir(experiment_name)
+    # Save the enitire model (structure + weights)
+    model.save(os.path.join(experiment_name, model_name+".hdf5"))
+
+    # Save only the weights
+    model.save_weights(os.path.join(experiment_name, model_name+".h5"))
+
+    # Save the structure only
+    model_json = model.to_json()
+    with open(os.path.join(experiment_name, model_name+".json"), "w") as json_file:
+        json_file.write(model_json)
+
+    model_size = get_model_size(model_name=model.name)
+
+    # Save model history
+    with open(os.path.join(experiment_name, model.name+"_train_history.json"), "w") as json_file:
+        json_file.write(json.dumps(model_train_history, cls=JsonEncoder))
+
+    trainable_parameters = count_params(model.trainable_weights)
+    non_trainable_parameters = count_params(model.non_trainable_weights)
+
+    # Save model metrics
+    metrics = {
+        "trainable_parameters":trainable_parameters,
+        "execution_time":execution_time,
+        "loss":evaluation_results[0],
+        "accuracy":evaluation_results[1],
+        "model_size":model_size,
+        "learning_rate":learning_rate,
+        "batch_size":batch_size,
+        "epochs":epochs,
+        "optimizer":type(optimizer).__name__
+    }
+    with open(os.path.join(experiment_name,model.name+"_model_metrics.json"), "w") as json_file:
+        json_file.write(json.dumps(metrics,cls=JsonEncoder))
+
  
+def get_model_size(model_name="model01"):
+    model_size = os.stat(os.path.join(experiment_name, model_name+".hdf5")).st_size
+    return model_size
+
+
+def append_training_history(model_train_history, prev_model_train_history, metrics=["loss","val_loss","accuracy","val_accuracy"]):
+    for metric in metrics:
+        for metric_value in prev_model_train_history[metric]:
+            model_train_history[metric].append(metric_value)
+
+    return model_train_history
+
+
+def evaluate_model(model, test_data, model_train_history, execution_time,
+                    learning_rate, batch_size, epochs, optimizer,
+                    save=True,
+                    loss_metrics=["loss","val_loss"],
+                    acc_metrics=["accuracy","val_accuracy"]):
+
+    # Get the number of epochs the training was run for
+    num_epochs = len(model_train_history[loss_metrics[0]])
+    
+    # Plot training results
+    fig = plt.figure(figsize=(15,5))
+    axs = fig.add_subplot(1,2,1)
+    axs.set_title('Loss')
+    # Plot all metrics
+    for metric in loss_metrics:
+        axs.plot(np.arange(0, num_epochs), model_train_history[metric], label=metric)
+    axs.legend()
+
+    axs = fig.add_subplot(1,2,2)
+    axs.set_title('Accuracy')
+    # Plot all metrics
+    for metric in acc_metrics:
+        axs.plot(np.arange(0, num_epochs), model_train_history[metric], label=metric)
+    axs.legend()
+
+    plt.show()
+
+    # Evaluate on test data
+    evaluation_results = model.evaluate(test_data, return_dict=True)
+
+    evaluation_results = [evaluation_results[loss_metrics[0]][-1], evaluation_results[acc_metrics[0]]]
+
+    print("evaluation results:", evaluation_results)
+    if save:
+        # Save model
+        save_model(model, model_train_history,execution_time, learning_rate, epochs, optimizer, evaluation_results)
+
+    return evaluation_results
+
+
 # MobileNet model
 def build_mobilenet_model(
     image_height, image_width, num_channels, num_classes, model_name, train_base=False
@@ -255,8 +366,6 @@ def build_mobilenet_model(
     tranfer_model_base.trainable = train_base
 
     # Regularize using L1
-    # kernel_weight = 0.02
-    # bias_weight = 0.02
     kernel_weight = 0.0
     bias_weight = 0.0
 
@@ -286,18 +395,18 @@ def build_mobilenet_model(
 # Efficient net model
 def build_efficient_net(image_height, image_width, num_channels, num_classes, model_name, train_base = False):
 
-    input_shape = (image_height,image_width,num_channels)
-    base_model = tf.keras.applications.EfficientNetB0(include_top = False)
-    base_model.trainable= train_base
+    input_shape = (image_height, image_width, num_channels)
+    base_model = tf.keras.applications.EfficientNetB0(include_top=False)
+    base_model.trainable = train_base
 
     # Create functional model
-    inputs = keras.layers.Input(shape=input_shape, name= "input_layer")
+    inputs = keras.layers.Input(shape=input_shape, name="input_layer")
 
     x = base_model(inputs, training=False)
     x = keras.layers.GlobalAveragePooling2D()(x)
     x = keras.layers.Dense(num_classes)(x)
-    outputs = keras.layers.Activation("softmax", dtype=tf.float32, name ="softmax_float32")(x)
-    model = tf.keras.Model(inputs,outputs, name = model_name + "_train_base_" + str(train_base))
+    outputs = keras.layers.Activation("softmax", dtype=tf.float32, name="softmax_float32")(x)
+    model = tf.keras.Model(inputs, outputs, name=model_name + "_train_base_" + str(train_base))
 
     #Get a summary of model
     return model
@@ -338,6 +447,109 @@ def build_model_tfhub(
     )
 
     return model
+
+
+# Define the Student Model
+def build_student_model(image_height, image_width, num_channels, num_classes, model_name):
+    input_shape = (image_height, image_width, num_channels)
+
+    # Define the architecture of the student model
+    inputs = keras.layers.Input(shape=input_shape, name="input_layer")
+    x = keras.layers.Conv2D(64, (3, 3), activation='relu')(inputs)
+    x = keras.layers.MaxPooling2D((2, 2))(x)
+    x = keras.layers.Conv2D(128, (3, 3), activation='relu')(x)
+    x = keras.layers.MaxPooling2D((2, 2))(x)
+    x = keras.layers.GlobalAveragePooling2D()(x)
+    x = keras.layers.Dense(256, activation='relu')(x)
+    outputs = keras.layers.Dense(num_classes, activation='softmax')(x)
+
+    # Create the student model
+    student_model = keras.models.Model(inputs, outputs, name=model_name)
+    return student_model
+
+# Distiller class
+class Distiller(Model):
+    def __init__(self, teacher, student, model_name="Distiller"):
+        super(Distiller, self).__init__(name=model_name)
+        self.teacher = teacher
+        self.student = student
+
+    def compile(self, optimizer, metrics, student_loss_fn, distillation_loss_fn, Lambda = 0.1, temperature=3):
+      """
+      optimizer: Keras optimizer for the student weights
+      metrics: Keras metrics for evaluation
+      student_loss_fn: Loss function of difference between student predictions and ground-truth
+      distillation_loss_fn: Loss function of difference between soft student predictions and soft teacher predictions
+      lambda: weight to student_loss_fn and 1-alpha to distillation_loss_fn
+      temperature: Temperature for softening probability distributions. Larger temperature gives softer distributions.
+      """
+      super(Distiller, self).compile(optimizer=optimizer, metrics=metrics)
+      self.student_loss_fn = student_loss_fn
+      self.distillation_loss_fn = distillation_loss_fn
+
+      #hyper-parameters
+      self.Lambda = Lambda
+      self.temperature = temperature
+
+    def train_step(self, data):
+        # Unpack data
+        x, y = data
+
+        # Forward pass of teacher (professor)
+        teacher_predictions = self.teacher(x, training=False)
+
+        student_predictions = self.student(x, training=True)
+        tf.print("Teacher predictions shape:", tf.shape(teacher_predictions))
+        tf.print("Student predictions shape:", tf.shape(student_predictions))
+        tf.print("Ground truth y shape:", tf.shape(y))
+
+        with tf.GradientTape() as tape:
+            # Forward pass of student
+            student_predictions = self.student(x, training=True)
+
+            # Compute losses
+            student_loss = self.student_loss_fn(y, student_predictions)
+            distillation_loss = self.distillation_loss_fn(
+                tf.nn.softmax(teacher_predictions / self.temperature, axis=1),
+                tf.nn.softmax(student_predictions / self.temperature, axis=1),
+            )
+            loss = self.Lambda * student_loss + (1 - self.Lambda) * distillation_loss
+
+        # Compute gradients
+        trainable_vars = self.student.trainable_variables
+        gradients = tape.gradient(loss, trainable_vars)
+
+        # Update weights
+        self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+
+        # Update the metrics configured in `compile()`.
+        self.compiled_metrics.update_state(y, student_predictions)
+
+        # Return a dict of performance
+        results = {m.name: m.result() for m in self.metrics}
+        results.update(
+            {"student_loss": student_loss, "distillation_loss": distillation_loss}
+        )
+        return results
+
+    def test_step(self, data):
+        # Unpack the data
+        x, y = data
+
+        # Compute predictions
+        y_prediction = self.student(x, training=False)
+
+        # Calculate the loss
+        student_loss = self.student_loss_fn(y, y_prediction)
+
+        # Update the metrics.
+        self.compiled_metrics.update_state(y, y_prediction)
+
+        # Return a dict of performance
+        results = {m.name: m.result() for m in self.metrics}
+        results.update({"student_loss": student_loss})
+        
+        return results
 
 
 print("Train model")
@@ -425,6 +637,30 @@ elif model_name == "EfficientNetV2B0":
     # Compile
     model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
 
+elif model_name == "EfficientNetV2B0-Distilled":
+    # Teacher model
+    teacher_model = build_efficient_net(
+        image_height,
+        image_width,
+        num_channels,
+        num_classes,
+        model_name,
+        train_base=train_base,
+    )
+    student_model = build_student_model(image_height, image_width, num_channels, num_classes, model_name='student_distill')
+    model = Distiller(teacher=teacher_model, student=student_model, model_name=model_name)
+    student_loss = keras.losses.sparse_categorical_crossentropy
+    distillation_loss = keras.losses.CategoricalCrossentropy(from_logits=False)
+    # Optimizer
+    #optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
+    optimizer = keras.optimizers.Adam()
+    # Compile
+    model.compile(
+        optimizer=optimizer, 
+        student_loss_fn=student_loss,
+        distillation_loss_fn=distillation_loss,
+        metrics=["accuracy"])
+
 #Initialize a W&B run
 wandb.init(
     project="platepals-training-vertex-ai",
@@ -448,6 +684,52 @@ training_results = model.fit(
 )
 execution_time = (time.time() - start_time) / 60.0
 print("Training execution time (mins)", execution_time)
+
+if model_name == "EfficientNetV2B0-Distilled":
+    training_history = training_results.history
+    evaluation_results = evaluate_model(model, validation_data,
+               training_history, execution_time, learning_rate, batch_size, epochs, optimizer,
+               save=False,
+               loss_metrics=["student_loss","distillation_loss","val_student_loss"],
+               acc_metrics=["accuracy","val_accuracy"])
+    save_model(student_model, training_history, execution_time, learning_rate, epochs, optimizer, evaluation_results)
+    models_folder = "models" # distil_models / models
+    models_metrics_list = glob(models_folder+"/*_metrics.json")
+
+    all_models_metrics = []
+    for mm_file in models_metrics_list:
+        with open(mm_file) as json_file:
+            model_metrics = json.load(json_file)
+            model_metrics["name"] = mm_file.replace(models_folder+"/","").replace("_model_metrics.json","")
+            all_models_metrics.append(model_metrics)
+
+    # Load metrics to dataframe
+    view_metrics = pd.DataFrame(data=all_models_metrics)
+
+    # Format columns
+    view_metrics['accuracy'] = view_metrics['accuracy']*100
+    view_metrics['accuracy'] = view_metrics['accuracy'].map('{:,.2f}%'.format)
+
+    view_metrics['trainable_parameters'] = view_metrics['trainable_parameters'].map('{:,.0f}'.format)
+    view_metrics['execution_time'] = view_metrics['execution_time'].map('{:,.2f} mins'.format)
+    view_metrics['loss'] = view_metrics['loss'].map('{:,.2f}'.format)
+    view_metrics['model_size'] = view_metrics['model_size']/1000000
+    view_metrics['model_size'] = view_metrics['model_size'].map('{:,.3f} MB'.format)
+
+    view_metrics = view_metrics.sort_values(by=['accuracy'],ascending=False)
+    view_metrics.head()
+
+    # wandb log
+    print(f"trainable_parameters: {view_metrics['trainable_parameters']}")
+    print(f"execution_time: {view_metrics['execution_time']}")
+    print(f"loss: {view_metrics['loss']}")
+    print(f"accuracy: {view_metrics['accuracy']}")
+    print(f"model_size: {view_metrics['model_size']}")
+    print(f"learning_rate: {view_metrics['learning_rate']}")
+    print(f"batch_size: {view_metrics['batch_size']}")
+    print(f"epochs: {view_metrics['epochs']}")
+    print(f"optimizer: {view_metrics['optimizer']}")
+    print(f"name: {view_metrics['name']}")
 
 # Update W&B
 wandb.config.update({"execution_time": execution_time})

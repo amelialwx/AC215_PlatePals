@@ -4,7 +4,7 @@ set -e
 
 export IMAGE_NAME=model-training-cli
 export BASE_DIR=$(pwd)
-export SECRETS_DIR=$(pwd)/../../../secrets
+export SECRETS_DIR=$(pwd)/../../../../secrets
 export GCS_BUCKET_URI="gs://platepals_trainer" # CHANGE THIS
 export GCP_PROJECT="ac215-399520" # CHANGE THIS
 
