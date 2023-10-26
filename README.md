@@ -162,7 +162,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
 
 ### Milestone 4 (distilling CNN Model) ###
-TODO
+We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model.
 
 Results
 ------------
