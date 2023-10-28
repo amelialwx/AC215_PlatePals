@@ -6,9 +6,9 @@ set -e
 export IMAGE_NAME="preprocessing-preprocess-image"
 export BASE_DIR=$(pwd)
 export SECRETS_DIR=$(pwd)/../../../secrets/
-export GCS_BUCKET_NAME="platepals_data"
-export GCP_PROJECT="AC215"
-export GCP_ZONE="us-central1-a"
+export GCS_BUCKET_NAME="platepals_temp"
+export GCP_PROJECT="ac215-399520"
+export GCP_ZONE="us-east1"
 export GOOGLE_APPLICATION_CREDENTIALS=/../secrets/data-service-account.json
 
 # Check to see if path to secrets is correct
@@ -26,11 +26,10 @@ echo "Host GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
 # Run the container
 # Run Docker with an initial command to check for the secret before proceeding
-docker run --rm --name $IMAGE_NAME -i \
+winpty docker run --rm --name $IMAGE_NAME -it \
 --mount type=bind,source="$BASE_DIR",target=/app \
 --mount type=bind,source="$SECRETS_DIR",target=/secrets \
--e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
--e GCP_PROJECT="$GCP_PROJECT" \
--e GCP_ZONE=$GCP_ZONE \
+-e GOOGLE_APPLICATION_CREDENTIALS=/../secrets/data-service-account.json \
+-e GCP_PROJECT=$GCP_PROJECT \
 -e GCS_BUCKET_NAME=$GCS_BUCKET_NAME \
--e DEV=1 $IMAGE_NAME /bin/bash -c 
+$IMAGE_NAME
