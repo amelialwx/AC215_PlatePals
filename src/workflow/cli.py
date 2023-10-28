@@ -29,10 +29,26 @@ DATA_PROCESSOR_IMAGE = "amelialwx/preprocess-image" # CHANGE THIS
 
 
 def generate_uuid(length: int = 8) -> str:
+    """
+    Generate a random UUID string of the specified length.
+
+    Args:
+        length (int): The length of the generated UUID.
+
+    Returns:
+        str: A random UUID string.
+    """
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
 
 def main(args=None):
+    """
+    Main entry point of the command line application.
+
+    Args:
+        args (argparse.Namespace): Command line arguments parsed by argparse.
+    """
+    
     print("CLI Arguments:", args)
 
     if args.data_processor:
