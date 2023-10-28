@@ -39,11 +39,18 @@ Project Organization
       ├── reports
       └── src
             |── ml-workflow
-                
+                ├── cli.py
+                ├── data_processor.yaml
+                ├── model_training.yaml
+                ├── model_deploy.yaml
+                ├── pipeline.yaml
+                ├── Dockerfile
+                ├── docker-entrypoint.sh
+                ├── docker-shell.sh
+                ├── Pipfile
+                └── Pipfile.lock
             |── model-training
-                ├── cli-multi-gpu.sh
                 ├── cli.py
-                ├── cli.sh
                 ├── docker-entrypoint.sh
                 ├── docker-shell.bat
                 ├── docker-shell.sh
@@ -65,7 +72,44 @@ Project Organization
                 ├── docker-shell.sh
                 ├── preprocess.py
                 └── requirements.txt
-                
+            |── model
+                |── effnetv2b0
+                     |── model-training
+                     ├── cli.py
+                     ├── cli.sh
+                     ├── docker-entrypoint.sh
+                     ├── docker-shell.bat
+                     ├── docker-shell.sh
+                     ├── Dockerfile
+                     ├── package-trainer.sh
+                     ├── Pipfile
+                     ├── Pipfile.lock
+                      └── package
+                          ├── PKG-INFO
+                          ├── setup.cfg
+                          ├── setup.py
+                          └── effnetv2b0-trainer
+                              ├── __init__.py
+                              └── task.py  
+                  |── effnetv2b0_distilled
+                           |── model-training
+                           ├── cli.py
+                           ├── cli.sh
+                           ├── docker-entrypoint.sh
+                           ├── docker-shell.bat
+                           ├── docker-shell.sh
+                           ├── Dockerfile
+                           ├── package-trainer.sh
+                           ├── Pipfile
+                           ├── Pipfile.lock
+                            └── package
+                                ├── PKG-INFO
+                                ├── setup.cfg
+                                ├── setup.py
+                                └── effnetv2b0-distilled-trainer
+                                    ├── __init__.py
+                                    └── task.py  
+                                    
 Preprocess container (Milestone 2)
 ------------
 - This container ingests 4.65GB of the [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101) and performs image preprocessing before uploading the modified data to a GCS Bucket.
