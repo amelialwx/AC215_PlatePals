@@ -38,6 +38,11 @@ Project Organization
       ├── setup.py
       ├── reports
       └── src
+            |── ml-workflow
+                |---data-processor
+                |---model-deploy
+                |---model-training
+                |---workflow
             |── model-training
                 ├── cli-multi-gpu.sh
                 ├── cli.py
