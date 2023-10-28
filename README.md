@@ -231,8 +231,9 @@ We put all the components we built for our PlatePals App together. We then apply
 - Model Deploy: Updates trained models signature with preprocessing logic added to it. Upload model to Vertex AI Model Registry and Deploy model to Model Endpoints.
 
 To run the `Data Processor` container serverlessly, we first need to build the docker image and push it to Docker Hub.
-Build and Push Data Processor Image to Docker Hub
-------------------------------------------------
+
+**Build and Push Data Processor Image to Docker Hub**
+
 - Sign up in Docker Hub and create an [Access Token](https://hub.docker.com/settings/security)
 - Login to the Hub: `docker login -u <USER NAME> -p <ACCESS TOKEN>`
 - Make sure you are inside the preprocessing folder and open a terminal at this location
@@ -240,6 +241,7 @@ Build and Push Data Processor Image to Docker Hub
 - After the image is built, tag the Docker Image: `docker image tag <platepal-data-processor:<TAG> <USER NAME>/platepal-data-processor:<TAG>`
 - Push to Docker Hub: `docker push <USER NAME>/platgepal-data-processor:<TAG>`
 
+**Vertex AI Pipeline**
 After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipelines to automate running all the tasks of the PlatePals app.
 - Make sure you are inside the workflow folder and open a terminal at this location
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
@@ -247,6 +249,11 @@ After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipel
 - Go to [Vertex AI Pipeline](https://console.cloud.google.com/vertex-ai/pipelines/runs?project=platepals-400123) to inspect the status of the job.
 - After the job is submitted, in the image below, you can see each container being run in sequence. We had a successful completion of the pipeline.
 ![vertex-ai-pipeline](assets/vertex-ai-pipeline.png)
+
+Alternatively, we can test specific components of the pipeline by running the folowing commands:
+- For Data Processor: Run `python cli.py --data_processor`
+- For Model Training: Run `python cli.py --model_training`
+- For Model Deploy: Run python `cli.py --model_deploy`
 
 DVC Setup
 ------------
