@@ -242,7 +242,9 @@ To run the `Data Processor` container serverlessly, we first need to build the d
 - Push to Docker Hub: `docker push <USER NAME>/platgepal-data-processor:<TAG>`
 
 **Vertex AI Pipeline**
+
 After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipelines to automate running all the tasks of the PlatePals app.
+
 - Make sure you are inside the workflow folder and open a terminal at this location
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 - Run `python cli.py --pipeline`, this will orchestrate all the tasks for the workflow and create a definition file called pipeline.yaml.
