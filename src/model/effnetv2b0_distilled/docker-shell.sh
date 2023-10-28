@@ -10,7 +10,7 @@ export GCP_PROJECT="ac215-399520" # CHANGE THIS
 
 # Check to see if path to secrets is correct
 if [ ! -f "$SECRETS_DIR/model-trainer.json" ]; then
-    echo "data-service-account.json not found at the path you have provided."
+    echo "model-trainer.json not found at the path you have provided."
     exit 1
 fi
 
