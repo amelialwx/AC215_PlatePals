@@ -9,6 +9,16 @@ GCS_BUCKET_URI = os.environ["GCS_BUCKET_URI"]
 
 
 def generate_uuid(length: int = 8) -> str:
+    """
+    Generate a random UUID string of the specified length.
+
+    Args:
+        length (int): The length of the generated UUID.
+
+    Returns:
+        str: A random UUID string.
+
+    """
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
 
