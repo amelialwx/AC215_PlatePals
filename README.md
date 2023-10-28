@@ -42,6 +42,21 @@ Project Organization
                 |---data-processor
                 |---model-deploy
                 |---model-training
+                    ├── cli.py
+                    ├── docker-entrypoint.sh
+                    ├── docker-shell.bat
+                    ├── docker-shell.sh
+                    ├── Dockerfile
+                    ├── package-trainer.sh
+                    ├── Pipfile
+                    ├── Pipfile.lock
+                    └── package
+                        ├── PKG-INFO
+                        ├── setup.cfg
+                        ├── setup.py
+                        └── trainer
+                            ├── __init__.py
+                            └── task.py
                 |---workflow
             |── model-training
                 ├── cli-multi-gpu.sh
@@ -183,12 +198,13 @@ Inside our training container, we sent our training job to GCP Vertex AI so it i
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
 
 ### Milestone 4 Part 2: ML Workflow Management ###
-we put all the components we built for our PlatePals App together. We then apply workflow management methods to test, execute, monitor, and automate these components:
+We put all the components we built for our PlatePals App together. We then apply workflow management methods to test, execute, monitor, and automate these components:
 
 - Data Processor: Download image from Tensorflow Dataset. Perform image resizing and augmentation. Upload preprocessed image to GCS bucket.
 - Model Training: Submits training jobs to Vertex AI to train the model.
 - Model Deploy: Updates trained models signature with preprocessing logic added to it. Upload model to Vertex AI Model Registry and Deploy model to Model Endpoints.
 
+To run each container independently, we 
 
 DVC Setup
 ------------
