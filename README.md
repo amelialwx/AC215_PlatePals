@@ -161,7 +161,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
 
-### Milestone 4 (distilling CNN Model) ###
+### Milestone 4 Part 1: Model Distillation ###
 We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model.
 
 Results
@@ -176,6 +176,14 @@ Below you can see the output from our Weights & Biases page. We used this tool t
 
 Inside our training container, we sent our training job to GCP Vertex AI so it is trained on instances in the cloud, which was how we connected to the Weights & Biases in the previous image above. In the image below, you can see several runs of our model. We had a successful completion of the custom job.
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+
+### Milestone 4 Part 2: ML Workflow Management ###
+we put all the components we built for our PlatePals App together. We then apply workflow management methods to test, execute, monitor, and automate these components:
+
+- Data Processor: Download image from Tensorflow Dataset. Perform image resizing and augmentation. Upload preprocessed image to GCS bucket.
+- Model Training: Submits training jobs to Vertex AI to train the model.
+- Model Deploy: Updates trained models signature with preprocessing logic added to it. Upload model to Vertex AI Model Registry and Deploy model to Model Endpoints.
+
 
 DVC Setup
 ------------
