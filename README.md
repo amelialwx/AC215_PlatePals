@@ -208,7 +208,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
 
 ### Milestone 4 Part 1: Model Distillation ###
-We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model.
+We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model. In our project as an example, we have one folder for the base model (`model/effnetv2b0`) and one for the distilled (`model/effnetv2b0_distilled`).
 
 Results
 ------------
