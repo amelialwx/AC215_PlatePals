@@ -84,7 +84,9 @@ print("GPU Available: ", tf.config.list_physical_devices("GPU"))
 print("All Physical Devices", tf.config.list_physical_devices())
 
 
-def download_and_unzip_from_gcs(bucket_name, blob_name, destination_path):
+def download_and_unzip_from_gcs(bucket_name: str, 
+                                blob_name: str, 
+                                destination_path: str) -> None:
     """
     Download and unzip a blob from Google Cloud Storage.
 
@@ -140,8 +142,16 @@ duration = (end_time - start_time) / 60
 print(f"Download execution time {duration} minutes.")
 
 
-# Function to create image paths and labels
-def gather_data_from_directory(data_dir):
+def gather_data_from_directory(data_dir: str) -> Tuple[List[str], List[str]]:
+    """
+    Create a list of image paths and corresponding labels by scanning a directory.
+
+    Parameters:
+        data_dir (str): The directory path to scan for image data.
+
+    Returns:
+        Tuple[List[str], List[str]]: A tuple containing lists of image paths and labels.
+    """
     image_paths = []
     labels = []
 
@@ -159,8 +169,16 @@ def gather_data_from_directory(data_dir):
     return image_paths, labels
 
 
-# Function to turn labels into indexes
-def encode_labels(labels):
+def encode_labels(labels: List[str]) -> Tuple[List[int], Dict[str, int]]:
+    """
+    Encode a list of labels into integer values and create a label-to-index mapping.
+
+    Parameters:
+        labels (List[str]): A list of labels.
+
+    Returns:
+        Tuple[List[int], Dict[str, int]]: A tuple containing the encoded labels and the label-to-index mapping.
+    """
     unique_labels = sorted(set(labels))
     label2index = {label: index for index, label in enumerate(unique_labels)}
     encoded_labels = [label2index[label] for label in labels]
@@ -192,8 +210,25 @@ print("total classes:", num_classes)
 wandb.login(key=args.wandb_key)
 
 
-# Create TF Data
-def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32, num_classes = 101):
+def get_dataset(image_width: int = 128,
+                image_height: int = 128,
+                num_channels: int = 3,
+                batch_size: int = 32,
+                num_classes: int = 101) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
+    """
+    Create TensorFlow datasets for training, validation, and testing.
+
+    Parameters:
+        image_width (int): Width of the image.
+        image_height (int): Height of the image.
+        num_channels (int): Number of color channels in the image.
+        batch_size (int): Batch size for the datasets.
+        num_classes (int): Number of target classes.
+
+    Returns:
+        Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]: A tuple of three TensorFlow datasets for training, validation, and testing.
+    """
+    
     # Load Image
     def load_image(path, label):
         image = tf.io.read_file(path)
@@ -238,21 +273,42 @@ def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32
 
 
 class JsonEncoder(json.JSONEncoder):
-  def default(self, obj):
-    if isinstance(obj, np.integer):
-        return int(obj)
-    elif isinstance(obj, np.floating):
-        return float(obj)
-    elif isinstance(obj, decimal.Decimal):
-        return float(obj)
-    elif isinstance(obj, np.ndarray):
-        return obj.tolist()
-    else:
-        return super(JsonEncoder, self).default(obj)
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, decimal.Decimal):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(JsonEncoder, self).default(obj)
 
 
 experiment_name = "models"
-def save_model(model, model_train_history, execution_time, learning_rate, epochs, optimizer, evaluation_results):
+def save_model(model: keras.models.Model,
+               model_train_history: dict,
+               execution_time: float,
+               learning_rate: float,
+               epochs: int,
+               optimizer: keras.optimizers.Optimizer,
+               evaluation_results: List[float]) -> None:
+    """
+    Save a trained model, its metrics, and training history.
+
+    Parameters:
+        model (keras.models.Model): The trained Keras model to be saved.
+        model_train_history (dict): Training history of the model.
+        execution_time (float): Execution time in minutes.
+        learning_rate (float): Learning rate used during training.
+        epochs (int): Number of training epochs.
+        optimizer (keras.optimizers.Optimizer): Optimizer used for training.
+        evaluation_results (List[float]): Model evaluation results.
+
+    Returns:
+        None
+    """
     model_name=model.name
 
     # Ensure path exists
@@ -293,13 +349,37 @@ def save_model(model, model_train_history, execution_time, learning_rate, epochs
     with open(os.path.join(experiment_name,model.name+"_model_metrics.json"), "w") as json_file:
         json_file.write(json.dumps(metrics,cls=JsonEncoder))
 
- 
-def get_model_size(model_name="model01"):
+
+def get_model_size(model_name: str = "model01") -> int:
+    """
+    Get the size (in bytes) of a saved model file.
+
+    Parameters:
+        model_name (str): Name of the model (default: "model01").
+
+    Returns:
+        int: Model size in bytes.
+    """
     model_size = os.stat(os.path.join(experiment_name, model_name+".hdf5")).st_size
     return model_size
 
 
-def append_training_history(model_train_history, prev_model_train_history, metrics=["loss","val_loss","accuracy","val_accuracy"]):
+def append_training_history(
+    model_train_history: dict,
+    prev_model_train_history: dict,
+    metrics: List[str] = ["loss", "val_loss", "accuracy", "val_accuracy"]
+) -> dict:
+    """
+    Append training history metrics from a previous model to the current model's history.
+
+    Parameters:
+        model_train_history (dict): Current model's training history.
+        prev_model_train_history (dict): Previous model's training history.
+        metrics (List[str]): List of metrics to append (default: ["loss", "val_loss", "accuracy", "val_accuracy"]).
+
+    Returns:
+        dict: Updated training history with appended metrics.
+    """
     for metric in metrics:
         for metric_value in prev_model_train_history[metric]:
             model_train_history[metric].append(metric_value)
@@ -307,11 +387,38 @@ def append_training_history(model_train_history, prev_model_train_history, metri
     return model_train_history
 
 
-def evaluate_model(model, test_data, model_train_history, execution_time,
-                    learning_rate, batch_size, epochs, optimizer,
-                    save=True,
-                    loss_metrics=["loss","val_loss"],
-                    acc_metrics=["accuracy","val_accuracy"]):
+def evaluate_model(
+    model: keras.models.Model,
+    test_data: tf.data.Dataset,
+    model_train_history: dict,
+    execution_time: float,
+    learning_rate: float,
+    batch_size: int,
+    epochs: int,
+    optimizer: keras.optimizers.Optimizer,
+    save: bool = True,
+    loss_metrics: List[str] = ["loss", "val_loss"],
+    acc_metrics: List[str] = ["accuracy", "val_accuracy"]
+) -> List[float]:
+    """
+    Evaluate a trained model on test data, visualize training history, and save the model and metrics.
+
+    Parameters:
+        model (keras.models.Model): The trained Keras model to be evaluated.
+        test_data (tf.data.Dataset): Test data for evaluation.
+        model_train_history (dict): Training history of the model.
+        execution_time (float): Execution time in minutes.
+        learning_rate (float): Learning rate used during training.
+        batch_size (int): Batch size used during training.
+        epochs (int): Number of training epochs.
+        optimizer (keras.optimizers.Optimizer): Optimizer used for training.
+        save (bool): Whether to save the model and metrics (default: True).
+        loss_metrics (List[str]): List of loss metrics to visualize and save (default: ["loss", "val_loss"]).
+        acc_metrics (List[str]): List of accuracy metrics to visualize and save (default: ["accuracy", "val_accuracy"]).
+
+    Returns:
+        List[float]: Model evaluation results, typically [test_loss, test_accuracy].
+    """
 
     # Get the number of epochs the training was run for
     num_epochs = len(model_train_history[loss_metrics[0]])
@@ -348,9 +455,27 @@ def evaluate_model(model, test_data, model_train_history, execution_time,
 
 
 # MobileNet model
-def build_mobilenet_model(
-    image_height, image_width, num_channels, num_classes, model_name, train_base=False
-):
+def build_mobilenet_model(image_height: int,
+                          image_width: int,
+                          num_channels: int,
+                          num_classes: int,
+                          model_name: str,
+                          train_base: bool = False) -> keras.models.Model:
+    """
+    Build a MobileNet-based Keras model for image classification.
+
+    Parameters:
+        image_height (int): Height of the input images.
+        image_width (int): Width of the input images.
+        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
+        num_classes (int): Number of target classes for classification.
+        model_name (str): Name to assign to the created model.
+        train_base (bool, optional): Whether to train the base MobileNet layers (default: False).
+
+    Returns:
+        keras.models.Model: A Keras model for image classification based on MobileNet architecture.
+    """
+    
     # Model input
     input_shape = [image_height, image_width, num_channels]  # height, width, channels
 
@@ -390,7 +515,28 @@ def build_mobilenet_model(
 
 
 # Efficient net model
-def build_efficient_net(image_height, image_width, num_channels, num_classes, model_name, train_base = False):
+def build_efficient_net(
+    image_height: int,
+    image_width: int,
+    num_channels: int,
+    num_classes: int,
+    model_name: str,
+    train_base: bool = False
+) -> keras.models.Model:
+    """
+    Build a Keras model for image classification using the EfficientNet architecture.
+
+    Parameters:
+        image_height (int): Height of the input images.
+        image_width (int): Width of the input images.
+        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
+        num_classes (int): Number of target classes for classification.
+        model_name (str): Name to assign to the created model.
+        train_base (bool, optional): Whether to train the base layers of the EfficientNet model (default: False).
+
+    Returns:
+        keras.models.Model: A Keras model for image classification based on the EfficientNet architecture.
+    """
 
     input_shape = (image_height,image_width,num_channels)
     base_model = tf.keras.applications.EfficientNetB0(include_top = False)
@@ -409,10 +555,27 @@ def build_efficient_net(image_height, image_width, num_channels, num_classes, mo
     return model
 
 
-# In class model
-def build_model_tfhub(
-    image_height, image_width, num_channels, num_classes, model_name, train_base=False
-):
+def build_model_tfhub(image_height: int,
+                      image_width: int,
+                      num_channels: int,
+                      num_classes: int,
+                      model_name: str,
+                      train_base: bool = False) -> keras.models.Model
+    """
+    Build a Keras model for image classification using a TensorFlow Hub (tfhub) pre-trained model.
+
+    Parameters:
+        image_height (int): Height of the input images.
+        image_width (int): Width of the input images.
+        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
+        num_classes (int): Number of target classes for classification.
+        model_name (str): Name to assign to the created model.
+        train_base (bool, optional): Whether to train the base layers of the pre-trained model (default: False).
+
+    Returns:
+        keras.models.Model: A Keras model for image classification based on a pre-trained model from TensorFlow Hub.
+    """
+    
     # Model input
     input_shape = [image_height, image_width, num_channels]  # height, width, channels
 
