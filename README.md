@@ -39,25 +39,7 @@ Project Organization
       ├── reports
       └── src
             |── ml-workflow
-                |---data-processor
-                |---model-deploy
-                |---model-training
-                    ├── cli.py
-                    ├── docker-entrypoint.sh
-                    ├── docker-shell.bat
-                    ├── docker-shell.sh
-                    ├── Dockerfile
-                    ├── package-trainer.sh
-                    ├── Pipfile
-                    ├── Pipfile.lock
-                    └── package
-                        ├── PKG-INFO
-                        ├── setup.cfg
-                        ├── setup.py
-                        └── trainer
-                            ├── __init__.py
-                            └── task.py
-                |---workflow
+                
             |── model-training
                 ├── cli-multi-gpu.sh
                 ├── cli.py
