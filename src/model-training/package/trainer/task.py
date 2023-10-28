@@ -69,8 +69,20 @@ print(tf.config.experimental.list_logical_devices("GPU"))
 print("GPU Available: ", tf.config.list_physical_devices("GPU"))
 print("All Physical Devices", tf.config.list_physical_devices())
 
-def download_blob(bucket_name, source_blob_name, destination_file_name):
-    """Downloads a blob from the bucket."""
+def download_blob(bucket_name: str, 
+                  source_blob_name: str, 
+                  destination_file_name: str) -> None:
+    """
+    Downloads a blob from the specified Google Cloud Storage bucket to a local file.
+
+    Args:
+        bucket_name (str): The name of the Google Cloud Storage bucket.
+        source_blob_name (str): The name of the source blob (object) to download.
+        destination_file_name (str): The local path where the downloaded blob should be saved.
+
+    Returns:
+        None
+    """
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(source_blob_name)
@@ -79,7 +91,10 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
 
     print(f"Blob {source_blob_name} downloaded to {destination_file_name}.")
 
-def download_and_unzip_from_gcs(bucket_name, blob_name, destination_path):
+
+def download_and_unzip_from_gcs(bucket_name: str, 
+                                blob_name: str, 
+                                destination_path: str) -> None:
     """
     Download and unzip a blob from Google Cloud Storage.
 
@@ -134,7 +149,18 @@ end_time = time.time()
 duration = (end_time - start_time) / 60
 print(f"Download execution time {duration} minutes.")
 
-def gather_data_from_directory(data_dir):
+
+def gather_data_from_directory(data_dir: str) -> Tuple[List[str], List[str]]:
+    """
+    Create a list of image paths and corresponding labels by scanning a directory.
+
+    Parameters:
+        data_dir (str): The directory path to scan for image data.
+
+    Returns:
+        Tuple[List[str], List[str]]: A tuple containing lists of image paths and labels.
+    """
+    
     image_paths = []
     labels = []
 
@@ -151,7 +177,17 @@ def gather_data_from_directory(data_dir):
 
     return image_paths, labels
 
-def encode_labels(labels):
+
+def encode_labels(labels: List[str]) -> Tuple[List[int], Dict[str, int]]:
+    """
+    Encode a list of labels into integer values and create a label-to-index mapping.
+
+    Parameters:
+        labels (List[str]): A list of labels.
+
+    Returns:
+        Tuple[List[int], Dict[str, int]]: A tuple containing the encoded labels and the label-to-index mapping.
+    """
     unique_labels = sorted(set(labels))
     label2index = {label: index for index, label in enumerate(unique_labels)}
     encoded_labels = [label2index[label] for label in labels]
@@ -175,7 +211,26 @@ print("validate_x count:", len(val_x))
 print("test_x count:", len(test_x))
 print("total classes:", num_classes)
 
-def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32, num_classes = 101):
+
+def get_dataset(image_width: int = 128,
+                image_height: int = 128,
+                num_channels: int = 3,
+                batch_size: int = 32,
+                num_classes: int = 101) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
+    """
+    Create TensorFlow datasets for training, validation, and testing.
+
+    Parameters:
+        image_width (int): Width of the image.
+        image_height (int): Height of the image.
+        num_channels (int): Number of color channels in the image.
+        batch_size (int): Batch size for the datasets.
+        num_classes (int): Number of target classes.
+
+    Returns:
+        Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]: A tuple of three TensorFlow datasets for training, validation, and testing.
+    """
+    
     # Load Image
     def load_image(path, label):
         image = tf.io.read_file(path)
@@ -220,9 +275,28 @@ def get_dataset(image_width=128, image_height=128, num_channels=3, batch_size=32
     return (train_data, validation_data, test_data)
 
 
-def build_mobilenet_model(
-    image_height, image_width, num_channels, num_classes, model_name, train_base=False
-):
+# MobileNet model
+def build_mobilenet_model(image_height: int,
+                          image_width: int,
+                          num_channels: int,
+                          num_classes: int,
+                          model_name: str,
+                          train_base: bool = False) -> keras.models.Model:
+    """
+    Build a MobileNet-based Keras model for image classification.
+
+    Parameters:
+        image_height (int): Height of the input images.
+        image_width (int): Width of the input images.
+        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
+        num_classes (int): Number of target classes for classification.
+        model_name (str): Name to assign to the created model.
+        train_base (bool, optional): Whether to train the base MobileNet layers (default: False).
+
+    Returns:
+        keras.models.Model: A Keras model for image classification based on MobileNet architecture.
+    """
+    
     # Model input
     input_shape = [image_height, image_width, num_channels]  # height, width, channels
 
@@ -260,7 +334,30 @@ def build_mobilenet_model(
 
     return model
 
-def build_efficient_net(image_height, image_width, num_channels, num_classes, model_name, train_base = False):
+
+# Efficient net model
+def build_efficient_net(
+    image_height: int,
+    image_width: int,
+    num_channels: int,
+    num_classes: int,
+    model_name: str,
+    train_base: bool = False
+) -> keras.models.Model:
+    """
+    Build a Keras model for image classification using the EfficientNet architecture.
+
+    Parameters:
+        image_height (int): Height of the input images.
+        image_width (int): Width of the input images.
+        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
+        num_classes (int): Number of target classes for classification.
+        model_name (str): Name to assign to the created model.
+        train_base (bool, optional): Whether to train the base layers of the EfficientNet model (default: False).
+
+    Returns:
+        keras.models.Model: A Keras model for image classification based on the EfficientNet architecture.
+    """
 
     input_shape = (image_height,image_width,num_channels)
     base_model = tf.keras.applications.EfficientNetB0(include_top = False)
@@ -279,9 +376,27 @@ def build_efficient_net(image_height, image_width, num_channels, num_classes, mo
     return model
 
 
-def build_model_tfhub(
-    image_height, image_width, num_channels, num_classes, model_name, train_base=False
-):
+# In class model
+def build_model_tfhub(image_height: int,
+                      image_width: int,
+                      num_channels: int,
+                      num_classes: int,
+                      model_name: str,
+                      train_base: bool = False) -> keras.models.Model
+    """
+    Build a Keras model for image classification using a TensorFlow Hub (tfhub) pre-trained model.
+
+    Parameters:
+        image_height (int): Height of the input images.
+        image_width (int): Width of the input images.
+        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
+        num_classes (int): Number of target classes for classification.
+        model_name (str): Name to assign to the created model.
+        train_base (bool, optional): Whether to train the base layers of the pre-trained model (default: False).
+
+    Returns:
+        keras.models.Model: A Keras model for image classification based on a pre-trained model from TensorFlow Hub.
+    """
     # Model input
     input_shape = [image_height, image_width, num_channels]  # height, width, channels
 
