@@ -244,7 +244,7 @@ After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipel
 - Make sure you are inside the workflow folder and open a terminal at this location
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 - Run `python cli.py --pipeline`, this will orchestrate all the tasks for the workflow and create a definition file called pipeline.yaml.
-- Go to [Vertex AI Pipeline]() to inspect the status of the job.
+- Go to [Vertex AI Pipeline](https://console.cloud.google.com/vertex-ai/pipelines/runs?project=platepals-400123) to inspect the status of the job.
 - After the job is submitted, in the image below, you can see each container being run in sequence. We had a successful completion of the pipeline.
 ![vertex-ai-pipeline](assets/vertex-ai-pipeline.png)
 
