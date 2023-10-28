@@ -15,6 +15,22 @@ def model_training(
     model_name: str = "EfficientNetV2B0",
     train_base: bool = False,
 ):
+    """
+    Run a custom model training job using Vertex AI.
+
+    Args:
+        project (str): The Google Cloud Project ID.
+        location (str): The Google Cloud location (e.g., 'us-central1').
+        staging_bucket (str): The GCS URI where the model package is staged.
+        bucket_name (str): The name of the GCS bucket where data and models are stored.
+        epochs (int): The number of training epochs (default: 1).
+        batch_size (int): The batch size for training (default: 32).
+        model_name (str): The name of the model to use (default: 'EfficientNetV2B0').
+        train_base (bool): Whether to train the base model (default: False).
+        
+    Returns:
+        None
+    """
     print("Model Training Job")
 
     import google.cloud.aiplatform as aip
@@ -70,6 +86,15 @@ def model_training(
 def model_deploy(
     bucket_name: str = "",
 ):
+    """
+    Deploy a trained model to Vertex AI for serving predictions.
+
+    Args:
+        bucket_name (str): The name of the GCS bucket where the model artifacts are stored.
+
+    Returns:
+        None
+    """
     print("Model Training Job")
 
     import google.cloud.aiplatform as aip
