@@ -139,14 +139,19 @@ Distilling our CNN Model and Integrating Kubeflow (Milestone 4)
 ------------
 This container contains all our training scripts and modeling components. It will use data from a GCP bucket, train, and then output model artifacts (saved model) to a GCP bucket. The input for this container is the source bucket for our training data and the output bucket for storing the trained model.
 (1) `src/model/effnetv2b0/package/effnetv2b0-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the EfficientNet model.
+
 (2) `src/model/effnetv2b0_distilled/package/effnetv2b0-distilled-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the distilled EfficientNet model.
+
 (3) `src/model/effnetv2b0/Dockerfile` - This dockerfile starts with python:3.9-slim-buster. This attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
 
 For the Workflow Orchestration Container, this container will be used to build pipelines that run in Vertex AI. Pipelines can be orchestrated using Kubeflow Pipelines Python SDK (kfp). This container will have a CLI to submit the pipeline to Vertex AI in GCP.
 
 (1) `src/workflow/cli.py` - The CLI to test creation and execution of pipelines.
+
 (2) `src/workflow/pipeline.yaml` - The generated pipeline definition file.
+
 (3) `src/workflow/Dockerfile` - This Dockerfile holds all the instruction to re-create an environemnt with all Google Cloud SDKs to enable us to connect with Vertext AI in GCP.
+
 (4) `src/workflow/Pipfile` - Contains all the python dependencies required
 
 Running our code
