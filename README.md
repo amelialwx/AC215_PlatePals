@@ -139,9 +139,9 @@ Distilling our CNN Model and Integrating Kubeflow (Milestone 4)
 ------------
 This container contains all our training scripts and modeling components. It will use data from a GCP bucket, train, and then output model artifacts (saved model) to a GCP bucket. The input for this container is the source bucket for our training data and the output bucket for storing the trained model.
 
-(1) `src/model/effnetv2b0/package/effnetv2b0-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the EfficientNet model.
+(1) `src/model/effnetv2b0/package/effnetv2b0-trainer/task.py` - This script loads our preprocessed food TF dataset and fits the EfficientNet model.
 
-(2) `src/model/effnetv2b0_distilled/package/effnetv2b0-distilled-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the distilled EfficientNet model.
+(2) `src/model/effnetv2b0_distilled/package/effnetv2b0-distilled-trainer/task.py` - This script loads our preprocessed food TF dataset and fits the distilled EfficientNet model.
 
 (3) `src/model/effnetv2b0/Dockerfile` - This dockerfile starts with `python:3.9-slim-buster`. This attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
 
