@@ -138,6 +138,7 @@ Model Training a Multi-Class CNN Model (Milestone 3)
 Distilling our CNN Model and Integrating Kubeflow (Milestone 4)
 ------------
 This container contains all our training scripts and modeling components. It will use data from a GCP bucket, train, and then output model artifacts (saved model) to a GCP bucket. The input for this container is the source bucket for our training data and the output bucket for storing the trained model.
+
 (1) `src/model/effnetv2b0/package/effnetv2b0-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the EfficientNet model.
 
 (2) `src/model/effnetv2b0_distilled/package/effnetv2b0-distilled-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the distilled EfficientNet model.
