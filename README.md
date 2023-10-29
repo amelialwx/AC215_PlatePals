@@ -143,7 +143,7 @@ This container contains all our training scripts and modeling components. It wil
 
 (2) `src/model/effnetv2b0_distilled/package/effnetv2b0-distilled-trainer/task.py` - This script loads our food TF dataset, applies standard image augmentation, and fits the distilled EfficientNet model.
 
-(3) `src/model/effnetv2b0/Dockerfile` - This dockerfile starts with python:3.9-slim-buster. This attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
+(3) `src/model/effnetv2b0/Dockerfile` - This dockerfile starts with `python:3.9-slim-buster`. This attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
 
 For the Workflow Orchestration Container, this container will be used to build pipelines that run in Vertex AI. Pipelines can be orchestrated using Kubeflow Pipelines Python SDK (kfp). This container will have a CLI to submit the pipeline to Vertex AI in GCP.
 
