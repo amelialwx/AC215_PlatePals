@@ -23,7 +23,7 @@ docker build -t $IMAGE_NAME -f Dockerfile .
 #docker build -t $IMAGE_NAME --platform=linux/arm64/v8 -f Dockerfile .
 
 # Run Container
-winpty docker run --rm --name $IMAGE_NAME -ti \
+docker run --rm --name $IMAGE_NAME -ti \
 --mount type=bind,source="$BASE_DIR",target=/app \
 --mount type=bind,source="$SECRETS_DIR",target=/secrets \
 -e GOOGLE_APPLICATION_CREDENTIALS=/../secrets/model-trainer.json \

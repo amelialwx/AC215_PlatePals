@@ -3,7 +3,7 @@
 # exit immediately if a command exits with a non-zero status
 set -e
 
-export IMAGE_NAME="preprocessing-preprocess-image"
+export IMAGE_NAME="preprocess-image"
 export BASE_DIR=$(pwd)
 export SECRETS_DIR=$(pwd)/../../../secrets/
 export GCS_BUCKET_NAME="platepals_temp"
@@ -26,7 +26,7 @@ echo "Host GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
 
 # Run the container
 # Run Docker with an initial command to check for the secret before proceeding
-winpty docker run --rm --name $IMAGE_NAME -it \
+docker run --rm --name $IMAGE_NAME -it \
 --mount type=bind,source="$BASE_DIR",target=/app \
 --mount type=bind,source="$SECRETS_DIR",target=/secrets \
 -e GOOGLE_APPLICATION_CREDENTIALS=/../secrets/data-service-account.json \
