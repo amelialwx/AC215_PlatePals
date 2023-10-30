@@ -74,34 +74,34 @@ Project Organization
                 └── requirements.txt
             |── model
                 |── effnetv2b0
-                     |── model-training
-                     ├── cli.py
-                     ├── cli.sh
-                     ├── docker-entrypoint.sh
-                     ├── docker-shell.bat
-                     ├── docker-shell.sh
-                     ├── Dockerfile
-                     ├── package-trainer.sh
-                     ├── Pipfile
-                     ├── Pipfile.lock
-                      └── package
-                          ├── PKG-INFO
-                          ├── setup.cfg
-                          ├── setup.py
-                          └── effnetv2b0-trainer
-                              ├── __init__.py
-                              └── task.py  
-                  |── effnetv2b0_distilled
-                           |── model-training
-                           ├── cli.py
-                           ├── cli.sh
-                           ├── docker-entrypoint.sh
-                           ├── docker-shell.bat
-                           ├── docker-shell.sh
-                           ├── Dockerfile
-                           ├── package-trainer.sh
-                           ├── Pipfile
-                           ├── Pipfile.lock
+                    |── model-training
+                    ├── cli.py
+                    ├── cli.sh
+                    ├── docker-entrypoint.sh
+                    ├── docker-shell.bat
+                    ├── docker-shell.sh
+                    ├── Dockerfile
+                    ├── package-trainer.sh
+                    ├── Pipfile
+                    ├── Pipfile.lock
+                    └── package
+                        ├── PKG-INFO
+                        ├── setup.cfg
+                        ├── setup.py
+                        └── effnetv2b0-trainer
+                            ├── __init__.py
+                            └── task.py  
+                |── effnetv2b0_distilled
+                    |── model-training
+                        ├── cli.py
+                        ├── cli.sh
+                        ├── docker-entrypoint.sh
+                        ├── docker-shell.bat
+                        ├── docker-shell.sh
+                        ├── Dockerfile
+                        ├── package-trainer.sh
+                        ├── Pipfile
+                        ├── Pipfile.lock
                             └── package
                                 ├── PKG-INFO
                                 ├── setup.cfg
@@ -137,15 +137,17 @@ Model Training a Multi-Class CNN Model (Milestone 3)
 
 Distilling our CNN Model and Integrating Kubeflow (Milestone 4)
 ------------
-This container contains all our training scripts and modeling components. It will use data from a GCP bucket, train, and then output model artifacts (saved model) to a GCP bucket. The input for this container is the source bucket for our training data and the output bucket for storing the trained model.
+This milestone introduces two new containers. The first contains all our training scripts and the second includes our Vertex AI pipeline integration. The first container will use data from a GCP bucket, train, and then output model artifacts (saved model) to a GCP bucket. The inputs for the second container is the source bucket for our trained model and creates a workflow job on Vertex AI.
+
+The `model` folder consists of two folders: `effnetv2b0` and `effnetv2b0-distilled`. The model that we have decided to use the EfficientNetV2B0 (go to "Discussion Regarding Tools Used" for explanation). This model is trained within the `effnetv2b0` folder. We have utilized the distillation compression method to train a student model that is smaller in size but can potentially achieve similar results as the teacher model (EfficientNetV2B0) and this is trained within the `effnetv2b0-distilled` folder.
 
 (1) `src/model/effnetv2b0/package/effnetv2b0-trainer/task.py` - This script loads our preprocessed food TF dataset and fits the EfficientNet model.
 
 (2) `src/model/effnetv2b0_distilled/package/effnetv2b0-distilled-trainer/task.py` - This script loads our preprocessed food TF dataset and fits the distilled EfficientNet model.
 
-(3) `src/model/effnetv2b0/Dockerfile` - This dockerfile starts with `python:3.9-slim-buster`. This attaches volume to the docker container and also uses secrets (not to be stored on GitHub) to connect to GCS.
+(3) `src/model/effnetv2b0/Dockerfile` - This dockerfile starts with `python:3.9-slim-buster`. This attaches volume to the docker container and also uses secrets  to connect to GCS.
 
-For the Workflow Orchestration Container, this container will be used to build pipelines that run in Vertex AI. Pipelines can be orchestrated using Kubeflow Pipelines Python SDK (kfp). This container will have a CLI to submit the pipeline to Vertex AI in GCP.
+For the `workflow` folder, running this script will create a container that will be used to build pipelines that run in Vertex AI. Pipelines can be orchestrated using Kubeflow Pipelines Python SDK (kfp). This container will have a CLI to submit the pipeline to Vertex AI in GCP.
 
 (1) `src/workflow/cli.py` - The CLI to test creation and execution of pipelines.
 
@@ -224,7 +226,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
 
 ### Milestone 4 Part 1: Model Distillation ###
-We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model. In our project as an example, we have one folder for the base model (`model/effnetv2b0`) and one for the distilled (`model/effnetv2b0_distilled`).
+We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model. In our project as an example, we have one folder for the base model (`model/effnetv2b0`) and one for the distilled (`model/effnetv2b0_distilled`). Follow the steps in Milestone 3 to modify any environment variables as needed.
 
 Results
 ------------
@@ -254,13 +256,15 @@ To run the `Data Processor` container serverlessly, we first need to build the d
 - Login to the Hub: `docker login -u <USER NAME> -p <ACCESS TOKEN>`
 - Make sure you are inside the preprocessing folder and open a terminal at this location
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
-- After the image is built, tag the Docker Image: `docker image tag <platepal-data-processor:<TAG> <USER NAME>/platepal-data-processor:<TAG>`
-- Push to Docker Hub: `docker push <USER NAME>/platgepal-data-processor:<TAG>`
+- After the image is built, tag the Docker Image: `docker image tag <preprocess-image <USER NAME>/preprocess-image`
+- Push to Docker Hub: `docker push <USER NAME>/preprocess-image`
 
 **Vertex AI Pipeline**
 
 After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipelines to automate running all the tasks of the PlatePals app.
 
+- Head to `src/workflow/cli.py` and modify the image to the path that you have set above: `<USER NAME>/preprocess-image`
+- Head to `src/workflow/docker-shell.sh` and modify `GCP_PROJECT`, `GCS_BUCKET_NAME`, `GCS_SERVICE_ACCOUNT`, `GCS_PACKAGE_URI` accordingly.
 - Make sure you are inside the workflow folder and open a terminal at this location
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 - Run `python cli.py --pipeline`, this will orchestrate all the tasks for the workflow and create a definition file called pipeline.yaml.
@@ -343,3 +347,11 @@ Discussion Regarding Tools Used
 4. **TF Data and TF Records**: Our project employs TensorFlow's tf.data and TFRecords as part of our data pipeline, specifically to facilitate efficient and scalable training of our image classification model based on EfficientNetV2B0. TFRecords offer a compact binary storage format, which is optimized for TensorFlow, allowing for rapid data loading. Coupled with the tf.data, it enables us to create highly performant input pipelines, thereby reducing I/O bottlenecks. By leveraging tf.data and TFRecords, we are able to ensure that the data feeding process doesn't become a bottleneck.
 
 5. **EfficientNetV2B0**: EfficientNetV2B0 is an evolution of the original EfficientNet architecture, designed for both improved accuracy and computational efficiency in the context of image classification tasks. According to [this study](https://arxiv.org/abs/2104.00298), the EfficientNetV2 models train faster while being up to 6.8x smaller. These enhancements make EfficientNetV2B0 an attractive choice for our project, as it allows us to achieve state-of-the-art accuracy while also maintaining computational efficiency, a key factor given the resource constraints that are often present in real-world machine learning projects.
+
+6. **EfficientNetV2B0 Distilled**: 
+
+In our project, we opted for model distillation over other techniques like quantization and compression to optimize our EfficientV2B0 model. The primary reason for this choice is that distillation allows for the preservation of model accuracy while reducing computational overhead. Distillation operates by transferring knowledge from a larger, more complex model (the "teacher") to a smaller, more efficient one (the "student"). This not only enables the student model to learn generalized features effectively but also to mimic the performance of the teacher model closely. Quantization, although effective in reducing model size, can introduce non-trivial quantization errors that compromise the model's accuracy. Compression techniques like pruning might reduce the network's size but can also result in a loss of important features and make the model architecture more complex to handle. Therefore, given that our primary objective was to balance both model size and accuracy efficiently, distillation emerged as the most fitting choice. 
+
+Here are the results that we obtained from our original EfficientNetV2B0 model vs. the distilled model.
+![distilled-dataframe/png](assets/distilled-dataframe.png)
+From the metrics, it's evident that the distilled version of the EfficientNetV2B0 model underperformed compared to its non-distilled counterpart (3.1x less accurate). Distillation, while an effective approach in theory, relies heavily on the quality of knowledge transfer between the teacher and student models. We believe that for case, the student model failed to capture the intricacies and essential features from the teacher model, resulting in suboptimal performance. This is evident from the drastic drop in model size (32x smaller). Additionally, our teacher model might have noisy or redundant features, in which case distillation would propagate those, degrading the student model's performance. Given the significant drop in accuracy, it makes sense to prioritize the metric that is most critical to the project's goals. Therefore, in light of the results and our commitment to achieving the best possible accuracy, we've decided to proceed with the original non-distilled EfficientNetV2B0 model.
