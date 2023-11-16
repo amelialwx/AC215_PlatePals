@@ -5,6 +5,7 @@ import zipfile
 import tarfile
 import time
 from google.cloud import storage
+from typing import Tuple, List, Dict
 
 # Tensorflow
 import tensorflow as tf
@@ -131,7 +132,7 @@ def download_and_unzip_from_gcs(bucket_name: str,
 # Download Data
 start_time = time.time()
 #bucket_name = os.environ.get('GCS_BUCKET_URI', 'default-bucket-name')
-bucket_name = "platepals_data"
+bucket_name = "platepals-data"
 data_version = "preprocessed_data"  # Example version
 splits = ['train', 'val', 'test']  # Example splits
 
@@ -275,66 +276,6 @@ def get_dataset(image_width: int = 128,
     return (train_data, validation_data, test_data)
 
 
-# MobileNet model
-def build_mobilenet_model(image_height: int,
-                          image_width: int,
-                          num_channels: int,
-                          num_classes: int,
-                          model_name: str,
-                          train_base: bool = False) -> keras.models.Model:
-    """
-    Build a MobileNet-based Keras model for image classification.
-
-    Parameters:
-        image_height (int): Height of the input images.
-        image_width (int): Width of the input images.
-        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
-        num_classes (int): Number of target classes for classification.
-        model_name (str): Name to assign to the created model.
-        train_base (bool, optional): Whether to train the base MobileNet layers (default: False).
-
-    Returns:
-        keras.models.Model: A Keras model for image classification based on MobileNet architecture.
-    """
-    
-    # Model input
-    input_shape = [image_height, image_width, num_channels]  # height, width, channels
-
-    # Load a pretrained model from keras.applications
-    tranfer_model_base = keras.applications.MobileNetV2(
-        input_shape=input_shape, weights="imagenet", include_top=False
-    )
-
-    # Freeze the mobileNet model layers
-    tranfer_model_base.trainable = train_base
-
-    # Regularize using L1
-    kernel_weight = 0.0
-    bias_weight = 0.0
-
-    model = Sequential(
-        [
-            tranfer_model_base,
-            keras.layers.GlobalAveragePooling2D(),
-            keras.layers.Dense(
-                units=128,
-                activation="relu",
-                kernel_regularizer=keras.regularizers.l1(kernel_weight),
-                bias_regularizer=keras.regularizers.l1(bias_weight),
-            ),
-            keras.layers.Dense(
-                units=num_classes,
-                activation="softmax",
-                kernel_regularizer=keras.regularizers.l1(kernel_weight),
-                bias_regularizer=keras.regularizers.l1(bias_weight),
-            ),
-        ],
-        name=model_name + "_train_base_" + str(train_base),
-    )
-
-    return model
-
-
 # Efficient net model
 def build_efficient_net(
     image_height: int,
@@ -374,61 +315,6 @@ def build_efficient_net(
     model = tf.keras.Model(inputs,outputs, name = model_name + "_train_base_" + str(train_base))
     #Get a summary of model
     return model
-
-
-# In class model
-def build_model_tfhub(image_height: int,
-                      image_width: int,
-                      num_channels: int,
-                      num_classes: int,
-                      model_name: str,
-                      train_base: bool = False) -> keras.models.Model
-    """
-    Build a Keras model for image classification using a TensorFlow Hub (tfhub) pre-trained model.
-
-    Parameters:
-        image_height (int): Height of the input images.
-        image_width (int): Width of the input images.
-        num_channels (int): Number of color channels in the input images (e.g., 3 for RGB).
-        num_classes (int): Number of target classes for classification.
-        model_name (str): Name to assign to the created model.
-        train_base (bool, optional): Whether to train the base layers of the pre-trained model (default: False).
-
-    Returns:
-        keras.models.Model: A Keras model for image classification based on a pre-trained model from TensorFlow Hub.
-    """
-    # Model input
-    input_shape = [image_height, image_width, num_channels]  # height, width, channels
-
-    # Handle to pretrained model
-    handle = "https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/feature_vector/4"
-
-    # Regularize using L1
-    kernel_weight = 0.02
-    bias_weight = 0.02
-
-    model = Sequential(
-        [
-            keras.layers.InputLayer(input_shape=input_shape),
-            hub.KerasLayer(handle, trainable=train_base),
-            keras.layers.Dense(
-                units=64,
-                activation="relu",
-                kernel_regularizer=keras.regularizers.l1(kernel_weight),
-                bias_regularizer=keras.regularizers.l1(bias_weight),
-            ),
-            keras.layers.Dense(
-                units=num_classes,
-                activation="softmax",
-                kernel_regularizer=keras.regularizers.l1(kernel_weight),
-                bias_regularizer=keras.regularizers.l1(bias_weight),
-            ),
-        ],
-        name=model_name + "_train_base_" + str(train_base),
-    )
-
-    return model
-
 
 print("Train model")
 ############################
@@ -527,11 +413,38 @@ print("Training execution time (mins)", execution_time)
 
 ARTIFACT_URI = f"gs://{args.bucket_name}/model"
 
+# Preprocess Image
+def preprocess_image(bytes_input):
+    decoded = tf.io.decode_jpeg(bytes_input, channels=3)
+    decoded = tf.image.convert_image_dtype(decoded, tf.float32)
+    resized = tf.image.resize(decoded, size=(128, 128))
+    return resized
+
+@tf.function(input_signature=[tf.TensorSpec([None], tf.string)])
+def preprocess_function(bytes_inputs):
+    decoded_images = tf.map_fn(
+        preprocess_image, bytes_inputs, dtype=tf.float32, back_prop=False
+    )
+    return {"model_input": decoded_images}
+
+@tf.function(input_signature=[tf.TensorSpec([None], tf.string)])
+def serving_function(bytes_inputs):
+    images = preprocess_function(bytes_inputs)
+    results = model_call(**images)
+    return results
+
+model_call = tf.function(model.call).get_concrete_function(
+    [
+        tf.TensorSpec(
+            shape=[None, 128, 128, 3], dtype=tf.float32, name="model_input"
+        )
+    ]
+)
+
 tf.saved_model.save(
     model,
     ARTIFACT_URI,
-    #signatures={"serving_default": serving_function},
+    signatures={"serving_default": serving_function},
 )
-
 
 print("Training Job Complete")
