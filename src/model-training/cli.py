@@ -29,6 +29,7 @@ aip.init(project=GCP_PROJECT, location=GCP_REGION, staging_bucket=GCS_BUCKET_URI
 job_id = generate_uuid()
 DISPLAY_NAME = "platepals_training_job_" + job_id
 TRAIN_IMAGE = "us-docker.pkg.dev/vertex-ai/training/tf-gpu.2-12.py310:latest"
+# TRAIN_IMAGE = "us-docker.pkg.dev/vertex-ai/training/tf-cpu.2-12.py310:latest"
 
 job = aip.CustomPythonPackageTrainingJob(
     display_name=DISPLAY_NAME,
@@ -38,7 +39,7 @@ job = aip.CustomPythonPackageTrainingJob(
     project=GCP_PROJECT,
 )
 
-CMDARGS = ["--model_name=EfficientNetV2B0", "--epochs=1", "--batch_size=32", f"--bucket_name={GCS_BUCKET_NAME}"]
+CMDARGS = ["--model_name=EfficientNetV2B0", "--epochs=3", "--batch_size=32", f"--bucket_name={GCS_BUCKET_NAME}"]
 MODEL_DIR = GCS_BUCKET_URI
 TRAIN_COMPUTE = "n1-standard-4"
 TRAIN_GPU = "NVIDIA_TESLA_T4"
