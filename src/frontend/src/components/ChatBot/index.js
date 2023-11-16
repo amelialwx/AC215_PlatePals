@@ -1,13 +1,8 @@
-
-//  const apiKey = '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'; // Replace with your actual OpenAI API key
-//  const headers = {
-//    'Authorization': `Bearer ${apiKey}`,
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
-const apiKey = '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'
+const apiKey = process.env.REACT_APP_OPENAI_API_KEY
 
 function ChatBot() {
     const [messages, setMessages] = useState([]);

@@ -8,7 +8,6 @@ import './App.css';
 import Content from "../common/Content";
 import Header from "../common/Header";
 import Footer from "../common/Footer";
-import ChatBot from "../common/ChatBot";
 import Theme from "./Theme";
 import AppRoutes from "./AppRoutes";
 import DataService from '../services/DataService';
