@@ -71,44 +71,7 @@ Project Organization
                 ├── docker-shell.bat
                 ├── docker-shell.sh
                 ├── preprocess.py
-                └── requirements.txt
-            |── model
-                |── effnetv2b0
-                    |── model-training
-                    ├── cli.py
-                    ├── cli.sh
-                    ├── docker-entrypoint.sh
-                    ├── docker-shell.bat
-                    ├── docker-shell.sh
-                    ├── Dockerfile
-                    ├── package-trainer.sh
-                    ├── Pipfile
-                    ├── Pipfile.lock
-                    └── package
-                        ├── PKG-INFO
-                        ├── setup.cfg
-                        ├── setup.py
-                        └── effnetv2b0-trainer
-                            ├── __init__.py
-                            └── task.py  
-                |── effnetv2b0_distilled
-                    |── model-training
-                        ├── cli.py
-                        ├── cli.sh
-                        ├── docker-entrypoint.sh
-                        ├── docker-shell.bat
-                        ├── docker-shell.sh
-                        ├── Dockerfile
-                        ├── package-trainer.sh
-                        ├── Pipfile
-                        ├── Pipfile.lock
-                            └── package
-                                ├── PKG-INFO
-                                ├── setup.cfg
-                                ├── setup.py
-                                └── effnetv2b0-distilled-trainer
-                                    ├── __init__.py
-                                    └── task.py  
+                └── requirements.txt 
                                     
 Preprocess container (Milestone 2)
 ------------
@@ -171,10 +134,15 @@ Running our code
 7. Click on "ADD KEY" > "Create new key" with "Key type" as JSON.
 8. Copy this JSON file into the secrets folder created in step 1 and rename it as "data-service-account.json".
 
+**Enabling APIs (make sure to have these APIs enabled on your GCP)**
+1. Cloud Resource Manager API
+2. Vertex AI API
+
 **Setup GCS Bucket (data bucket)**
 1. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
 2. Search for "Buckets" from the top search box OR go to: "Cloud Storage" > "Buckets" and create a new bucket with an appropriate bucket name e.g. "platepals-data".
-3. Click done. This will create a new GCS Bucket (GCS_BUCKET_NAME) for the container to upload your preprocessed data.
+3. Under "Location type", select "Region" > "us-east1 (South Carolina)".
+4. Click done. This will create a new GCS Bucket (GCS_BUCKET_NAME) for the container to upload your preprocessed data.
 
 **Set GCP Credentials**
 1. Head to `src/preprocessing/docker-shell.sh`.
@@ -221,7 +189,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 3. Once you are in the docker container, run `sh package-trainer.sh`.
 4. You should be able to see that a `tar.gz` file has been uploaded to your GCS trainer bucket.
 ![bucket-trainer](assets/bucket-trainer.png)
-4. **NOTE: EXECUTION MAY TAKE 15 MINUTES TO 1 AN HOUR DEPENDING ON GPU/CPU.** Still inside the docker container, run `sh cli.sh`.
+4. **NOTE: EXECUTION MAY TAKE 15 MINUTES TO 1 AN HOUR DEPENDING ON GPU/CPU.** Still inside the docker container, run `python cli.py`.
 3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
 
@@ -256,7 +224,7 @@ To run the `Data Processor` container serverlessly, we first need to build the d
 - Login to the Hub: `docker login -u <USER NAME> -p <ACCESS TOKEN>`
 - Make sure you are inside the preprocessing folder and open a terminal at this location
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
-- After the image is built, tag the Docker Image: `docker image tag <preprocess-image <USER NAME>/preprocess-image`
+- After the image is built, tag the Docker Image: `docker image tag preprocess-image <USER NAME>/preprocess-image`
 - Push to Docker Hub: `docker push <USER NAME>/preprocess-image`
 
 **Vertex AI Pipeline**
