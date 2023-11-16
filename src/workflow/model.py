@@ -55,6 +55,7 @@ def model_training(
         f"--model_name={model_name}",
         f"--bucket_name={bucket_name}",
     ]
+    
     if train_base:
         CMDARGS.append("--train_base")
 
@@ -72,8 +73,8 @@ def model_training(
         args=CMDARGS,
         replica_count=1,
         machine_type=TRAIN_COMPUTE,
-        # accelerator_type=TRAIN_GPU,
-        # accelerator_count=TRAIN_NGPU,
+        accelerator_type=TRAIN_GPU,
+        accelerator_count=TRAIN_NGPU,
         base_output_dir=MODEL_DIR,
         sync=True,
     )
