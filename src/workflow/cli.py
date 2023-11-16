@@ -102,6 +102,7 @@ def main(args=None):
                 location=GCP_REGION,
                 staging_bucket=GCS_PACKAGE_URI,
                 bucket_name=GCS_BUCKET_NAME,
+                epochs = 3,
             )
 
         # Build yaml file for pipeline
