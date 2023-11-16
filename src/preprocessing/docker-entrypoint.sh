@@ -12,7 +12,7 @@ then
     # Set GCP Project Details
     gcloud config set project $GCP_PROJECT
     #/bin/bash
-    pipenv shell
+    pipenv run python cli.py
 else
   pipenv run python $args
 fi
