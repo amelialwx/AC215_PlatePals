@@ -4,7 +4,7 @@
 set -e
 
 # Define some environment variables
-export IMAGE_NAME="frontend"
+export IMAGE_NAME="frontend-react"
 export BASE_DIR=$(pwd)
 
 # Build the image based on the Dockerfile

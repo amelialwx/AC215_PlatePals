@@ -1,5 +1,4 @@
 import { BASE_API_URL } from "./Common";
-
 const axios = require('axios');
 
 const DataService = {
@@ -11,7 +10,7 @@ const DataService = {
     },
 
     ImageClassificationPredict: async function (formData) {
-        return await axios.post(BASE_API_URL + "/imageclassification/predict", formData, {
+        return await axios.post(BASE_API_URL + "/predict", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -45,6 +44,7 @@ const DataService = {
     StyleTransferGetImage: function (image_path) {
         return BASE_API_URL + "/styletransfer/get_image?image_path=" + image_path;
     }
+    
 }
 
 export default DataService;
