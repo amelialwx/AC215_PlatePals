@@ -9,6 +9,7 @@ import Text2Audio from "../components/Text2Audio";
 import Plots from "../components/Plots";
 import Todo from "../components/Todo";
 import ChatBot from "../components/ChatBot";
+import Prediction from "../components/Prediction";
 
 const AppRouter = (props) => {
 
@@ -20,7 +21,7 @@ const AppRouter = (props) => {
         <Route path="/" exact component={Home} />
         <Route path="/blank" exact component={Blank} />
         <Route path="/todo" exact component={Todo} />
-        <Route path="/imageclassification" exact component={ImageClassification} />
+        <Route path="/imageclassification" exact component={Prediction} />
         <Route path="/audio2text" exact component={Audio2Text} />
         <Route path="/text2audio" exact component={Text2Audio} />
         <Route path="/plots" exact component={Plots} />
