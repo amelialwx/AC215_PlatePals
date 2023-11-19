@@ -122,7 +122,12 @@ const ImageClassification = (props) => {
                     {prediction && (
                         <React.Fragment>
                         <div>
-                            <p>Based of your food image, we recommend asking: Could you give me some dietary recommendations on {prediction.prediction_label}?</p>
+                            <ol>
+                              <li>Nutritional Analysis of {prediction.prediction_label}: Can you provide a detailed nutritional analysis of {prediction.prediction_label}, including its calorie content and key nutrients?</li>
+                              <li>Calorie-Specific {prediction.prediction_label} Meals: I am targeting a daily calorie intake of 1800 calories. Given that I enjoy {prediction.prediction_label}, could you suggest meal plans incorporating {prediction.prediction_label} that align with my calorie goal?</li>
+                              <li>Weight Management with {prediction.prediction_label}: I am focusing on weight management and like to include {prediction.prediction_label} in my diet. Can you recommend other meals that complement {prediction.prediction_label} and support weight management?</li>
+                              <li>Healthy {prediction.prediction_label} Snack Ideas: {prediction.prediction_label} is my go-to snack. Can you suggest some variations or additional healthy snacks that are similar in nutritional value to {prediction.prediction_label}?</li>
+                            </ol>
                         </div>
                         </React.Fragment>
                     )}

@@ -43,22 +43,9 @@ const TOC = (props) => {
                 <List>
                     <ListItem button component={Link} to="/imageclassification">
                         <ListItemIcon><Icon>image</Icon></ListItemIcon>
-                        <ListItemText primary='Upload Image' />
-                    </ListItem>
-                </List>
-                <List>
-                    <ListItem button component={Link} to="/todo">
-                        <ListItemIcon><Icon>format_list_bulleted</Icon></ListItemIcon>
-                        <ListItemText primary='Nutritional Facts' />
-                    </ListItem>
-
-                </List>
-                <List>
-                    <ListItem button component={Link} to="/chatbot">
                         <ListItemIcon><Icon>smart_toy</Icon></ListItemIcon>
-                        <ListItemText primary='ChatBot' />
+                        <ListItemText primary='Upload Image / Chatbot' />
                     </ListItem>
-
                 </List>
             </main>
         </div>
