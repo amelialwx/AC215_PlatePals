@@ -7,7 +7,7 @@ import Paper from '@material-ui/core/Paper';
 import axios from 'axios';
 import DataService from "../../services/DataService";
 import styles from './styles';
-const apiKey = "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"
+const apiKey = process.env.REACT_APP_OPENAI_API_KEY
 
 const ImageClassification = (props) => {
     const { classes } = props;
