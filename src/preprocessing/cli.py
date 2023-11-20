@@ -11,8 +11,8 @@ from google.cloud import storage
 IMG_SIZE = 128
 
 # GCS
-#BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
-BUCKET_NAME = "platepals_temp" # CHANGE THIS
+# BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
+BUCKET_NAME = "platepals-data" # CHANGE THIS
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 
 # Constants for nutrients dataset

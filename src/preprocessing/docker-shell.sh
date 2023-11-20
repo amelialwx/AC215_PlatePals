@@ -6,8 +6,8 @@ set -e
 export IMAGE_NAME="preprocess-image"
 export BASE_DIR=$(pwd)
 export SECRETS_DIR=$(pwd)/../../../secrets/
-export GCS_BUCKET_NAME="platepals_temp"
-export GCP_PROJECT="ac215-399520"
+export GCS_BUCKET_NAME="platepals-data"
+export GCP_PROJECT="platepals-405005"
 export GCP_ZONE="us-east1"
 export GOOGLE_APPLICATION_CREDENTIALS=/../secrets/data-service-account.json
 
