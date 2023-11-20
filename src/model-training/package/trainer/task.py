@@ -4,6 +4,7 @@ import requests
 import zipfile
 import tarfile
 import time
+import datetime
 from google.cloud import storage
 from typing import Tuple, List, Dict
 
@@ -302,11 +303,10 @@ def build_efficient_net(
 
     input_shape = (image_height,image_width,num_channels)
     base_model = tf.keras.applications.EfficientNetB0(include_top = False)
-    base_model.trainable= train_base
+    base_model.trainable = train_base
 
     # Create functional model
     inputs = keras.layers.Input(shape=input_shape, name= "input_layer")
-    # Note: Since EfficientNetBX models have rescaling no need to use preprocessing e.g. x= preprocessing.Rescaling(1/255.)
 
     x = base_model(inputs, training=False)
     x = keras.layers.GlobalAveragePooling2D()(x)
@@ -314,7 +314,13 @@ def build_efficient_net(
     outputs = keras.layers.Activation("softmax", dtype=tf.float32, name ="softmax_float32")(x)
     model = tf.keras.Model(inputs,outputs, name = model_name + "_train_base_" + str(train_base))
     #Get a summary of model
-    return model
+    return base_model, model
+
+# Creating the tensoboard callback
+def create_tensorboard_callback(dir_name,experiment):
+  date_time = datetime.datetime.now().strftime('%Y/%m/%d:%H-%M-%S')
+  path = os.path.join(dir_name,experiment,date_time)
+  return tf.keras.callbacks.TensorBoard(log_dir=path)
 
 print("Train model")
 ############################
@@ -327,10 +333,18 @@ image_height = 128
 num_channels = 3
 batch_size = args.batch_size
 epochs = args.epochs
-train_base = args.train_base
+train_base = False
 
 # Free up memory
 K.clear_session()
+
+checkpoint_path = 'model_checkpoints/cp.cpkt'
+
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
+                                                         monitor='val_accuracy',
+                                                         save_best_only=True,
+                                                         save_weights_only=True,
+                                                         verbose=0)
 
 # Data
 train_data, validation_data, test_data = get_dataset(
@@ -342,72 +356,65 @@ train_data, validation_data, test_data = get_dataset(
 )
 print("Converted to Tensorflow dataset.")
 
-if model_name == "mobilenetv2":
-    # Model
-    model = build_mobilenet_model(
-        image_height,
-        image_width,
-        num_channels,
-        num_classes,
-        model_name,
-        train_base=train_base,
-    )
-    # Optimizer
-    optimizer = keras.optimizers.SGD(learning_rate=learning_rate)
-    # Loss
-    loss = keras.losses.categorical_crossentropy
-    # Print the model architecture
-    print(model.summary())
-    # Compile
-    model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
-
-elif model_name == "tfhub_mobilenetv2":
-    # Model
-    model = build_model_tfhub(
-        image_height,
-        image_width,
-        num_channels,
-        num_classes,
-        model_name,
-        train_base=train_base,
-    )
-    # Optimizer
-    optimizer = keras.optimizers.Adam()
-    # Loss
-    loss = keras.losses.sparse_categorical_crossentropy
-    # Print the model architecture
-    print(model.summary())
-    # Compile
-    model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
-
-elif model_name == "EfficientNetV2B0":
-    # Model
-    model = build_efficient_net(
-        image_height,
-        image_width,
-        num_channels,
-        num_classes,
-        model_name,
-        train_base=train_base,
-    )
-    # Optimizer
-    #optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
-    optimizer = keras.optimizers.Adam()
-    # Loss
-    loss = keras.losses.sparse_categorical_crossentropy
-    # Print the model architecture
-    print(model.summary())
-    # Compile
-    model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
+# Model
+base_model, model = build_efficient_net(
+    image_height,
+    image_width,
+    num_channels,
+    num_classes,
+    model_name,
+    train_base=train_base,
+)
+# Optimizer
+#optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
+optimizer = keras.optimizers.Adam()
+# Loss
+loss = keras.losses.sparse_categorical_crossentropy
+# Print the model architecture
+print(model.summary())
+# Compile
+model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
 
 # Train model
 start_time = time.time()
 training_results = model.fit(
     train_data,
+    steps_per_epoch=len(train_data),
     validation_data=validation_data,
     epochs=epochs,
-    verbose=1,
+    verbose=0,
+    callbacks=[create_tensorboard_callback('models','FX_efficientnet0'),checkpoint_callback],
 )
+
+base_model.trainable = True
+for layer in base_model.layers[:-20]:
+  layer.trainable = False
+
+model.compile(loss='sparse_categorical_crossentropy',
+              optimizer=tf.keras.optimizers.Adam(1e-4),
+              metrics=['accuracy'])
+
+early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_loss",
+                                                  patience=3)
+
+checkpoint_path = "fine_tune_checkpoints/"
+model_checkpoint = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
+                                                      save_best_only=True,
+                                                      monitor="val_loss")
+
+reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor="val_loss",  
+                                                 factor=0.2,
+                                                 patience=2,
+                                                 verbose=1,
+                                                 min_lr=1e-7)
+                                            
+best_model = model.fit(train_data,
+                       epochs=100,
+                       steps_per_epoch=len(train_data),
+                       validation_data=validation_data,
+                       callbacks=[create_tensorboard_callback('models','best_fine_effb0'),
+                                  early_stopping,reduce_lr,model_checkpoint])
+
 execution_time = (time.time() - start_time) / 60.0
 print("Training execution time (mins)", execution_time)
 

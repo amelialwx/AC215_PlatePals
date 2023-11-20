@@ -5,9 +5,9 @@ set -e
 export IMAGE_NAME=model-training
 export BASE_DIR=$(pwd)
 export SECRETS_DIR=$(pwd)/../../../secrets/
-export GCS_BUCKET_URI="gs://platepals_trainers"
-export GCS_BUCKET_NAME="platepals_trainers"
-export GCP_PROJECT="ac215-399520" # CHANGE THIS
+export GCS_BUCKET_URI="gs://platepals-trainer"
+export GCS_BUCKET_NAME="platepals-trainer"
+export GCP_PROJECT="platepals-405005" # CHANGE THIS
 export GCP_ZONE="us-east1"
 export GCP_REGION="us-east1"
 
@@ -23,7 +23,7 @@ docker build -t $IMAGE_NAME -f Dockerfile .
 #docker build -t $IMAGE_NAME --platform=linux/arm64/v8 -f Dockerfile .
 
 # Run Container
-docker run --rm --name $IMAGE_NAME -ti \
+winpty docker run --rm --name $IMAGE_NAME -ti \
 --mount type=bind,source="$BASE_DIR",target=/app \
 --mount type=bind,source="$SECRETS_DIR",target=/secrets \
 -e GOOGLE_APPLICATION_CREDENTIALS=/../secrets/model-trainer.json \
