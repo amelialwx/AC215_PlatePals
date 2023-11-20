@@ -7,6 +7,7 @@ components:
       parameters:
         bucket_name:
           defaultValue: ''
+          description: The name of the GCS bucket where the model artifacts are stored.
           isOptional: true
           parameterType: STRING
 deploymentSpec:
@@ -38,9 +39,12 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef model_deploy(\n    bucket_name: str = \"\",\n):\n    print(\"\
-          Model Training Job\")\n\n    import google.cloud.aiplatform as aip\n\n \
-          \   # List of prebuilt containers for prediction\n    # https://cloud.google.com/vertex-ai/docs/predictions/pre-built-containers\n\
+          \ *\n\ndef model_deploy(\n    bucket_name: str = \"\",\n):\n    \"\"\"\n\
+          \    Deploy a trained model to Vertex AI for serving predictions.\n\n  \
+          \  Args:\n        bucket_name (str): The name of the GCS bucket where the\
+          \ model artifacts are stored.\n\n    Returns:\n        None\n    \"\"\"\n\
+          \    print(\"Model Training Job\")\n\n    import google.cloud.aiplatform\
+          \ as aip\n\n    # List of prebuilt containers for prediction\n    # https://cloud.google.com/vertex-ai/docs/predictions/pre-built-containers\n\
           \    serving_container_image_uri = (\n        \"us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest\"\
           \n    )\n\n    display_name = \"Platepals App Model\"\n    ARTIFACT_URI\
           \ = f\"gs://{bucket_name}/model\"\n\n    # Upload and Deploy model to Vertex\
@@ -68,7 +72,7 @@ root:
           parameters:
             bucket_name:
               runtimeValue:
-                constant: platepals_trainers
+                constant: platepals-trainer
         taskInfo:
           name: model-deploy
 schemaVersion: 2.1.0
