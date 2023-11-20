@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
-//const apiKey = process.env.REACT_APP_OPENAI_API_KEY
-const apiKey = "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"
+const apiKey = process.env.REACT_APP_OPENAI_API_KEY
 
 function ChatBot() {
     const [messages, setMessages] = useState([]);
