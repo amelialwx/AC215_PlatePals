@@ -28,7 +28,11 @@ aip.init(project=GCP_PROJECT, location=GCP_REGION, staging_bucket=GCS_BUCKET_URI
 
 job_id = generate_uuid()
 DISPLAY_NAME = "platepals_training_job_" + job_id
+
+# Train with GPU
 # TRAIN_IMAGE = "us-docker.pkg.dev/vertex-ai/training/tf-gpu.2-12.py310:latest"
+
+# Train with CPU
 TRAIN_IMAGE = "us-docker.pkg.dev/vertex-ai/training/tf-cpu.2-12.py310:latest"
 
 job = aip.CustomPythonPackageTrainingJob(
