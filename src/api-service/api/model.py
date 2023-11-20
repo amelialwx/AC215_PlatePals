@@ -3,42 +3,65 @@ import json
 import numpy as np
 import tensorflow as tf
 from google.cloud import aiplatform
+from tensorflow.keras.preprocessing import image
 import base64
+from collections import Counter
 
-AUTOTUNE = tf.data.experimental.AUTOTUNE
-labels_path = "/persistent/labels.json"
-image_width = 128
-image_height = 128
-num_channels = 3
+def center_crop(x, center_crop_size):
+    centerw, centerh = x.shape[0]//2, x.shape[1]//2
+    halfw, halfh = center_crop_size[0]//2, center_crop_size[1]//2
+    return x[centerw-halfw:centerw+halfw, centerh-halfh:centerh+halfh, :]
 
-def load_preprocess_image_from_path(image_path):
-    print("Image", image_path)
+def predict_10_crop(img, model, top_n=5):
+    crop_size = (224, 224)
+    flipped_X = np.fliplr(img)
 
-    # Prepare the data
-    def load_image(path):
-        image = tf.io.read_file(path)
-        image = tf.image.decode_jpeg(image, channels=num_channels)
-        image = tf.image.resize(image, [image_height, image_width])
-        return image
+    # Create 10 crops
+    crops = [
+        img[:crop_size[0], :crop_size[1], :],  # Upper Left
+        img[:crop_size[0], -crop_size[1]:, :], # Upper Right
+        img[-crop_size[0]:, :crop_size[1], :], # Lower Left
+        img[-crop_size[0]:, -crop_size[1]:, :],# Lower Right
+        center_crop(img, crop_size),           # Center
+        flipped_X[:crop_size[0], :crop_size[1], :],  # Flipped Upper Left
+        flipped_X[:crop_size[0], -crop_size[1]:, :], # Flipped Upper Right
+        flipped_X[-crop_size[0]:, :crop_size[1], :], # Flipped Lower Left
+        flipped_X[-crop_size[0]:, -crop_size[1]:, :],# Flipped Lower Right
+        center_crop(flipped_X, crop_size)            # Flipped Center
+    ]
 
-    # Normalize pixels
-    def normalize(image):
-        image = image / 255
-        return image
+    # Resize crops
+    crops = [tf.image.resize(crop, (224, 224)) for crop in crops]
 
-    test_data = tf.data.Dataset.from_tensor_slices(([image_path]))
-    test_data = test_data.map(load_image, num_parallel_calls=AUTOTUNE)
-    test_data = test_data.map(normalize, num_parallel_calls=AUTOTUNE)
-    test_data = test_data.repeat(1).batch(1)
+    # Model prediction
+    y_pred = model.predict(np.stack(crops, axis=0))
+    preds = np.argmax(y_pred, axis=1)
+    top_n_preds = np.argpartition(y_pred, -top_n)[:,-top_n:]
 
-    return test_data
+    return preds, top_n_preds
+
+
+def make_prediction(image_path, my_model, index2label):
+    print("Predict using self-hosted model")
+
+    img = image.load_img(image_path)
+    img_array = image.img_to_array(img)
+
+    preds, top_n_preds = predict_10_crop(img_array, my_model)
+    most_common_pred, count = Counter(preds).most_common(1)[0]
+    prediction_label = index2label[str(most_common_pred)]
+
+    return {
+        "prediction_label": prediction_label,
+    }
+
 
 def make_prediction_vertexai(image_path, index2label):
     print("Predict using Vertex AI endpoint")
 
     # Get the endpoint
     endpoint = aiplatform.Endpoint(
-        "projects/939067285486/locations/us-central1/endpoints/3828572055683465216"
+        "projects/543953613952/locations/us-central1/endpoints/98078636220874752"
     )
 
     with open(image_path, "rb") as f:
@@ -51,9 +74,6 @@ def make_prediction_vertexai(image_path, index2label):
     print("Result:", result)
     prediction = result.predictions[0]
     print(prediction, prediction.index(max(prediction)))
-
-    # with open(labels_path, "r") as file:
-    #     index2label = json.load(file)
 
     prediction_label = index2label[str(prediction.index(max(prediction)))]
 

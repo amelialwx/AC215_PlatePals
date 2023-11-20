@@ -1,9 +1,7 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
 uvicorn = "*"
@@ -14,6 +12,9 @@ tensorflow-hub = "*"
 python-multipart = "*"
 tensorflow = "==2.13.1"
 google-cloud-aiplatform = "*"
+pillow = "*"
+
+[dev-packages]
 
 [requires]
 python_version = "3.9"
