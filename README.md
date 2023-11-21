@@ -258,6 +258,27 @@ Alternatively, we can test specific components of the pipeline by running the fo
 - For Model Training: Run `python cli.py --model_training`
 - For Model Deploy: Run python `cli.py --model_deploy`
 
+### Milestone 5 ###
+
+After completions of building a robust ML Pipeline in our previous milestone we have built a backend api service and frontend app. This will be our user-facing application that ties together the various components built in previous milestones.
+
+**Application Design**
+
+Before we start implementing the app we built a detailed design document outlining the application’s architecture. We built a Solution Architecture abd Technical Architecture to ensure all our components work together.
+
+Here is our Solution Architecture:
+![solution_architecture](assets/solution_architecture.png)
+
+Here is our Technical Architecture:
+![technical_architecture](assets/technical_architecture.png)
+
+**Deployment**
+
+We used Ansible to create, provision, and deploy our frontend and backend to GCP in an automated fashion. Ansible helps us manage infrastructure as code and this is very useful to keep track of our app infrastructure as code in GitHub. It helps use setup deployments in a very automated way.
+
+Here is our deployed app on a single VM in GCP:
+![ansible_deployment](assets/ansible_deployment.png)
+
 DVC Setup
 ------------
 This step is entirely optional.
