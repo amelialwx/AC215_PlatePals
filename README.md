@@ -38,6 +38,19 @@ Project Organization
       ├── setup.py
       ├── reports
       └── src
+            |── deployment
+                ├── deploy-create-instance.yml
+                ├── deploy-docker-images.yml
+                ├── deploy-provision-instance.yml
+                ├── deploy-setup-containers.yml
+                ├── deploy-setup-webserver.yml
+                ├── inventory.yml
+                ├── Dockerfile
+                ├── docker-entrypoint.sh
+                ├── docker-shell.sh
+                ├── nginx-conf
+                      ├── nginx
+                            ├── nginx.conf
             |── ml-workflow
                 ├── cli.py
                 ├── data_processor.yaml
