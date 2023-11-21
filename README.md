@@ -1,4 +1,4 @@
-AC215 - Milestone 4 (PlatePals)
+AC215 - Milestone 5 (PlatePals)
 ==============================
 ### Team Members ###
 
@@ -279,7 +279,7 @@ We used Ansible to create, provision, and deploy our frontend and backend to GCP
 Here is our deployed app on a single VM in GCP:
 ![ansible_deployment](assets/ansible_deployment.png)
 
-*Deployment Container* This container helps manage building and deployeing all our app containers. The deployment is to GCP and all docker images go to GCR.
+The deployment container helps manage building and deployeing all our app containers. The deployment is to GCP and all docker images go to GCR.
 
 To run the deployment container:
 
@@ -347,7 +347,7 @@ ansible-playbook deploy-setup-containers.yml -i inventory.yml
 ```
 ansible-playbook deploy-setup-webserver.yml -i inventory.yml
 ```
-- Once the command runs go to http://<External IP>/
+- Once the command runs go to `http://<External IP>/`
 
 
 DVC Setup
