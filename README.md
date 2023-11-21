@@ -258,7 +258,7 @@ Alternatively, we can test specific components of the pipeline by running the fo
 - For Model Training: Run `python cli.py --model_training`
 - For Model Deploy: Run python `cli.py --model_deploy`
 
-### Milestone 5 ###
+### Milestone 5: API, Frontend, and Deployment ###
 
 After completions of building a robust ML Pipeline in our previous milestone we have built a backend api service and frontend app. This will be our user-facing application that ties together the various components built in previous milestones.
 
