@@ -48,9 +48,9 @@ Project Organization
                 ├── Dockerfile
                 ├── docker-entrypoint.sh
                 ├── docker-shell.sh
-                ├── nginx-conf
-                      ├── nginx
-                            ├── nginx.conf
+                └── nginx-conf
+                    └── nginx
+                        └── nginx.conf
             |── ml-workflow
                 ├── cli.py
                 ├── data_processor.yaml
