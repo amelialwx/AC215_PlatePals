@@ -42,6 +42,7 @@ def predict_10_crop(img, model, top_n=5):
 
 
 def make_prediction(image_path, my_model, index2label):
+
     print("Predict using self-hosted model")
 
     img = image.load_img(image_path)
