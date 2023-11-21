@@ -46,21 +46,6 @@ function ChatBot() {
     };
 
     return (
-//        <div>
-//            <div>
-//                {messages.map((msg, index) => (
-//                    <p key={index}><strong>{msg.role}:</strong> {msg.content}</p>
-//                ))}
-//            </div>
-//            <input
-//                type="text"
-//                value={input}
-//                onChange={handleInputChange}
-//                onKeyPress={handleKeyPress}
-//            />
-//            <button onClick={sendMessage}>Send</button>
-//        </div>
-
         <div>
             <main>
                 <Container maxWidth={false}>

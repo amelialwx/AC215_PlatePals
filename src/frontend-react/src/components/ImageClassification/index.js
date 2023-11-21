@@ -83,6 +83,13 @@ const ImageClassification = (props) => {
             });
     }
 
+    const toTitleCase = (str) => {
+        return str
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+    
     return (
         <div className={classes.root}>
             <main className={classes.main}>
@@ -94,10 +101,7 @@ const ImageClassification = (props) => {
                     {prediction && (
                         <div>
                             <Typography variant="h6" gutterBottom>
-                                Prediction: {prediction.prediction_label}
-                            </Typography>
-                            <Typography variant="subtitle1">
-                                Accuracy: {prediction.accuracy}%
+                                Prediction: {toTitleCase(prediction.prediction_label)}
                             </Typography>
                         </div>
                     )}
@@ -123,10 +127,10 @@ const ImageClassification = (props) => {
                         <React.Fragment>
                         <div>
                             <ol>
-                              <li>Nutritional Analysis of {prediction.prediction_label}: Can you provide a detailed nutritional analysis of {prediction.prediction_label}, including its calorie content and key nutrients?</li>
-                              <li>Calorie-Specific {prediction.prediction_label} Meals: I am targeting a daily calorie intake of 1800 calories. Given that I enjoy {prediction.prediction_label}, could you suggest meal plans incorporating {prediction.prediction_label} that align with my calorie goal?</li>
-                              <li>Weight Management with {prediction.prediction_label}: I am focusing on weight management and like to include {prediction.prediction_label} in my diet. Can you recommend other meals that complement {prediction.prediction_label} and support weight management?</li>
-                              <li>Healthy {prediction.prediction_label} Snack Ideas: {prediction.prediction_label} is my go-to snack. Can you suggest some variations or additional healthy snacks that are similar in nutritional value to {prediction.prediction_label}?</li>
+                              <li>Nutritional Analysis of {toTitleCase(prediction.prediction_label).toLowerCase()}: Can you provide a detailed nutritional analysis of {toTitleCase(prediction.prediction_label).toLowerCase()}, including its calorie content and key nutrients?</li>
+                              <li>Calorie-Specific {toTitleCase(prediction.prediction_label).toLowerCase()} Meals: I am targeting a daily calorie intake of 1800 calories. Given that I enjoy {toTitleCase(prediction.prediction_label).toLowerCase()}, could you suggest meal plans incorporating {toTitleCase(prediction.prediction_label).toLowerCase()} that align with my calorie goal?</li>
+                              <li>Weight Management with {toTitleCase(prediction.prediction_label).toLowerCase()}: I am focusing on weight management and like to include {toTitleCase(prediction.prediction_label).toLowerCase()} in my diet. Can you recommend other meals that complement {toTitleCase(prediction.prediction_label).toLowerCase()} and support weight management?</li>
+                              <li>Healthy {toTitleCase(prediction.prediction_label).toLowerCase()} Snack Ideas: {toTitleCase(prediction.prediction_label).toLowerCase()} is my go-to snack. Can you suggest some variations or additional healthy snacks that are similar in nutritional value to {toTitleCase(prediction.prediction_label).toLowerCase()}?</li>
                             </ol>
                         </div>
                         </React.Fragment>
