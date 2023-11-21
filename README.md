@@ -24,9 +24,13 @@ In milestone 2, we provide a container that pulls data from the TensorFlow [Food
 
 In this milestone, we provide a container to read our training, validation, and testing dataset from our remote GCS bucket, fit a CNN model to called EfficientNetV2B0 through a custom job sent to [GCP Vertex AI](https://console.cloud.google.com/vertex-ai/training/custom-jobs) and model dashboard set up through [Weights and Biases](https://wandb.ai/).
 
-**Milestone 4**
+**Recap of Milestone 4**
 
 In this milestone, we distilled our CNN model called EfficientNetV2B0 and provided performance benchmarks and analysis. Furthermore, we documented the successful integration of Vertex AI Pipelines (Kubeflow) for machine learning orchestration and cloud functions for process automation. Additionally, we have added docstrings and type hints to all of our Python functions.
+
+**Milestone 5**
+
+In this milestone, we are focused on advancing and deploying a user-centric application that integrates the elements established in the preceding milestone. The application's front-end is developed using React, and its deployment is managed through Google Cloud Platform (GCP) Virtual Machines and Ansible for streamlined orchestration and automation.
 
 Project Organization
 ------------
@@ -38,6 +42,15 @@ Project Organization
       ├── setup.py
       ├── reports
       └── src
+            |── api-service
+                └── api
+                    ├── model.py
+                    └── service.py
+                ├── docker-entrypoint.sh
+                ├── Dockerfile
+                ├── docker-shell.sh
+                ├── Pipfile
+                ├── Pipfile.lock
             |── deployment
                 ├── deploy-create-instance.yml
                 ├── deploy-docker-images.yml
