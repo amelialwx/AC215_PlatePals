@@ -64,7 +64,7 @@ Project Organization
                 └── nginx-conf
                     └── nginx
                         └── nginx.conf
-            |── ml-workflow
+            |── workflow
                 ├── cli.py
                 ├── data_processor.yaml
                 ├── model_training.yaml
@@ -78,7 +78,6 @@ Project Organization
             |── model-training
                 ├── cli.py
                 ├── docker-entrypoint.sh
-                ├── docker-shell.bat
                 ├── docker-shell.sh
                 ├── Dockerfile
                 ├── package-trainer.sh
@@ -94,7 +93,6 @@ Project Organization
             |── preprocessing
                 ├── Dockerfile
                 ├── docker-entrypoint.sh
-                ├── docker-shell.bat
                 ├── docker-shell.sh
                 ├── preprocess.py
                 └── requirements.txt 
@@ -273,11 +271,11 @@ Alternatively, we can test specific components of the pipeline by running the fo
 
 ### Milestone 5: API, Frontend, and Deployment ###
 
-After completions of building a robust ML Pipeline in our previous milestone we have built a backend api service and frontend app. This will be our user-facing application that ties together the various components built in previous milestones.
+After completions of building a robust ML Pipeline in our previous milestone we have built a backend api service and frontend app. This will be our user-facing application that ties together the various components built in previous milestones. 
 
 **Application Design**
 
-Before we start implementing the app we built a detailed design document outlining the application’s architecture. We built a Solution Architecture abd Technical Architecture to ensure all our components work together.
+Before we start implementing the app, we built a detailed design document outlining the application’s architecture. We built a Solution Architecture and Technical Architecture to ensure all our components work together.
 
 Here is our Solution Architecture:
 ![solution_architecture](assets/solution_architecture.png)
@@ -285,29 +283,55 @@ Here is our Solution Architecture:
 Here is our Technical Architecture:
 ![technical_architecture](assets/technical_architecture.png)
 
+**Backend API**
+
+We built backend API service using Fast API to expose model functionality to the frontend. We also added APIs that will help the frontend display some key information about the model and data.
+![backend_api](assets/backend_api.png)
+
+**Frontend**
+[TODO]
+
 **Deployment**
 
-We used Ansible to create, provision, and deploy our frontend and backend to GCP in an automated fashion. Ansible helps us manage infrastructure as code and this is very useful to keep track of our app infrastructure as code in GitHub. It helps use setup deployments in a very automated way.
+We used Ansible to create, provision, and deploy our frontend and backend to GCP in an automated fashion. Ansible helps us manage infrastructure and this is very useful to keep track of our app infrastructure as code in GitHub. It helps use setup deployments in a very automated way.
 
 Here is our deployed app on a single VM in GCP:
 ![ansible_deployment](assets/ansible_deployment.png)
 
-The deployment container helps manage building and deployeing all our app containers. The deployment is to GCP and all docker images go to GCR.
+### Code Structure
 
-To run the deployment container:
+The following are the folders from the previous milestones:
+```
+- preprocessing
+- model-training
+- workflow
+```
+
+**API Service Container**
+
+ This container has all the python files to run and expose the backend APIs. The container has the option to run either the model hosted through Vertex AI endpoint, or run the self-hosted model. The container is set to run the self-hosted model by default.
+
+ To run the container locally:
+ - Open a terminal and move to src/api-service
+ - Run `sh docker-shell.sh`
+ - Once inside the docker container, run `uvicorn_server`
+ - To view and test APIs, go to [localhost:9000](http://localhost:9000)
+
+ **Frontend Container**
+ TODO
+
+**Deployment Container**
+
+The deployment container helps manage building and deploying all our app containers. The deployment is to GCP and all docker images go to GCR.
+
+To run the container locally:
 
 - Open a terminal and move into `src/deployment`
 - Run `sh docker-shell.sh`
 
-*SSH Setup*
 - Configuring OS Login for service account
 ```
 gcloud compute project-info add-metadata --project <YOUR GCP_PROJECT> --metadata enable-oslogin=TRUE
-```
-
-example:
-```
-gcloud compute project-info add-metadata --project ac215-project --metadata enable-oslogin=TRUE
 ```
 - Create SSH key for service account
 ```
@@ -330,15 +354,7 @@ From the output of the above command keep note of the username. Here is a snippe
     uid: '3906553998'
     username: sa_100110341521630214262
 ```
-The username is `sa_100110341521630214262`.
-
-*Deployment Setup*
-- Add ansible user details in inventory.yml file
-- GCP project details in inventory.yml file
-- GCP Compute instance details in inventory.yml file
-
-*Deployment*
-
+The username is `sa_100110341521630214262`. Add this username to the inventory.yml file. Update the GCP project details and the compute instance details in the inventory.yml file as well.
 - Build and Push Docker Containers to GCR (Google Container Registry)
 ```
 ansible-playbook deploy-docker-images.yml -i inventory.yml
@@ -347,7 +363,7 @@ ansible-playbook deploy-docker-images.yml -i inventory.yml
 ```
 ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluster_state=present
 ```
-Once the command runs successfully get the IP address of the compute instance from GCP Console and update the appserver>hosts in inventory.yml file
+Once the command runs successfully, get the external IP address of the compute instance from GCP Console and update the appserver > hosts in inventory.yml file
 - Provision Compute Instance in GCP Install and setup all the required things for deployment.
 ```
 ansible-playbook deploy-provision-instance.yml -i inventory.yml
@@ -360,7 +376,7 @@ ansible-playbook deploy-setup-containers.yml -i inventory.yml
 ```
 ansible-playbook deploy-setup-webserver.yml -i inventory.yml
 ```
-- Once the command runs go to `http://<External IP>/`
+- Once the command runs, go to `http://<External IP>/`
 
 
 DVC Setup
