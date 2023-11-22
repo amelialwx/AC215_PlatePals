@@ -291,9 +291,10 @@ We built backend API service using Fast API to expose model functionality to the
 
 **Frontend**
 
-A user friendly React app was built to identify food images uploaded by the user using CNN models from the backend. Using the app a user can take a photo of their foods and upload it. The app will send the image to the backend api to get prediction results on a classification label of their foods. Furthermore, an AI Chatbot powered by OpenAI will be enabled along with suggestions for questions to ask the ChatBot based on the food the model predicted their food was.
+A user friendly React app was built to identify food images uploaded by the user using CNN models from the backend. Using the app a user can take a photo of their foods and upload it. The app will send the image to the backend api to get prediction results on a classification label of their foods. Furthermore, an AI Chatbot powered by OpenAI will be enabled along with suggestions for prompts to ask the ChatBot based on the food the model predicted their food was (i.e. Can you provide a detailed nutritional analysis of hamburgers, including its calorie content and key nutrients?).
 
 Here are some screenshots of our app (1st image: CNN Model prediction serving results after user uploaded image, 2nd image: AI ChatBot enabled after prediction along with possible prompt suggestions based on user upload, 3rd image: App home page):
+
 <img src="assets/frontend-pred.jpg"  width="800">
 <img src="assets/frontend-chatbot.jpg"  width="800">
 <img src="assets/frontend-home.jpg"  width="800">
@@ -332,6 +333,7 @@ To run the container locally:
 
 - Open a terminal and go to the `frontend-react` folder
 - Run `sh docker-shell.sh` or `docker-shell.bat` for Windows
+- Run `yarn install` to install `node_modules` folder (can skip step if already installed)
 - Run `yarn start` from the Docker shell
 - Go to `http://localhost:3000`
 
