@@ -43,14 +43,58 @@ Project Organization
       ├── reports
       └── src
             |── api-service
-                └── api
+                ├── api
                     ├── model.py
                     └── service.py
                 ├── docker-entrypoint.sh
                 ├── Dockerfile
                 ├── docker-shell.sh
                 ├── Pipfile
-                ├── Pipfile.lock
+                └── Pipfile.lock
+            |── frontend-react
+                ├── conf
+                    └── conf.d
+                        └── default.conf
+                ├── public
+                    ├── index.html
+                    └── manifest.json
+                ├── src
+                    ├── app
+                        ├── App.css
+                        ├── App.js
+                        ├── AppRoute.js
+                        └── Theme.js
+                    ├── common
+                        ├── Content
+                            ├── index.js
+                            └── style.js
+                        ├── Footer
+                            ├── index.js
+                            └── style.js
+                        └── Header
+                            ├── index.js
+                            └── style.js
+                    ├── components
+                        ├── ChatBot
+                            ├── index.js
+                            └── style.js
+                        ├── Error
+                            └── 404.js
+                        ├── Home
+                            ├── index.js
+                            └── style.js
+                        ├── ImageClassification
+                            ├── index.js
+                            └── style.js
+                        └── TOC
+                            ├── index.js
+                            └── style.js
+                    ├── services
+                        ├── Common.js
+                        └── DataService.js
+                    ├── index.css
+                    └── index.js
+
             |── deployment
                 ├── deploy-create-instance.yml
                 ├── deploy-docker-images.yml
@@ -90,7 +134,7 @@ Project Organization
                     └── trainer
                         ├── __init__.py
                         └── task.py
-            |── preprocessing
+            └── preprocessing
                 ├── Dockerfile
                 ├── docker-entrypoint.sh
                 ├── docker-shell.sh
@@ -320,6 +364,7 @@ The following are the folders from the previous milestones:
  This container has all the python files to run and expose the backend APIs. The container has the option to run either the model hosted through Vertex AI endpoint, or run the self-hosted model. The container is set to run the self-hosted model by default.
 
  To run the container locally:
+ 
  - Open a terminal and move to src/api-service
  - Run `sh docker-shell.sh`
  - Once inside the docker container, run `uvicorn_server`
@@ -331,6 +376,7 @@ Here we will use the React frontend framework to build a robust food prediction 
 
 To run the container locally:
 
+- Create a .env file inside the `frontend-react` folder with the variable `REACT_APP_OPENAI_API_KEY` defined.
 - Open a terminal and go to the `frontend-react` folder
 - Run `sh docker-shell.sh` or `docker-shell.bat` for Windows
 - Run `yarn install` to install `node_modules` folder (can skip step if already installed)
