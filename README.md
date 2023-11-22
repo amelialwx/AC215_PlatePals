@@ -30,7 +30,7 @@ In this milestone, we distilled our CNN model called EfficientNetV2B0 and provid
 
 **Milestone 5**
 
-In this milestone, we are focused on advancing and deploying a user-centric application that integrates the elements established in the preceding milestone. The application's front-end is developed using React, and its deployment is managed through Google Cloud Platform (GCP) Virtual Machines and Ansible for streamlined orchestration and automation.
+In this milestone, we are focused on advancing and deploying a user-centric application that integrates the elements established in the preceding milestone. The application's front-end is developed using React, and its deployment is managed through Google Cloud Platform (GCP) Virtual Machines and Ansible for streamlined orchestration and automation. Furthermore, we also added a ChatBot into our app allowing users to chat with an AI based on the food image they uploaded.
 
 Project Organization
 ------------
