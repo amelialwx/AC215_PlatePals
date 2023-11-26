@@ -110,6 +110,7 @@ Project Organization
                         └── nginx.conf
             |── workflow
                 ├── cli.py
+                ├── model.py
                 ├── data_processor.yaml
                 ├── model_training.yaml
                 ├── model_deploy.yaml
