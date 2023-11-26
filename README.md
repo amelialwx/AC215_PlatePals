@@ -138,8 +138,9 @@ Project Organization
                 ├── Dockerfile
                 ├── docker-entrypoint.sh
                 ├── docker-shell.sh
-                ├── preprocess.py
-                └── requirements.txt 
+                ├── cli.py
+                ├── Pipfile
+                └── Pipfile.lock
                                     
 Preprocess container (Milestone 2)
 ------------
