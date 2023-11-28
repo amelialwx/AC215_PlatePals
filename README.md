@@ -94,7 +94,6 @@ Project Organization
                         └── DataService.js
                     ├── index.css
                     └── index.js
-
             |── deployment
                 ├── deploy-create-instance.yml
                 ├── deploy-docker-images.yml
@@ -207,6 +206,10 @@ Running our code
 **Enabling APIs (make sure to have these APIs enabled on your GCP)**
 1. Cloud Resource Manager API
 2. Vertex AI API
+3. Compute Engine API
+4. Service Usage API
+5. Google Container Registry API
+6. Kubernetes Engine API
 
 **Setup GCS Bucket (data bucket)**
 1. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
