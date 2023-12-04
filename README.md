@@ -191,6 +191,14 @@ For the `workflow` folder, running this script will create a container that will
 
 Running our code
 ------------
+### Enable APIs (make sure to have these APIs enabled on your GCP) ###
+1. Cloud Resource Manager API
+2. Vertex AI API
+3. Compute Engine API
+4. Service Usage API
+5. Google Container Registry API
+6. Kubernetes Engine API
+
 ### Milestone 2 (preprocessing container) ###
 
 **Setup GCP Service Account**
@@ -202,14 +210,6 @@ Running our code
 6. Click on the "..." under the "Actions" column and select "Manage keys".
 7. Click on "ADD KEY" > "Create new key" with "Key type" as JSON.
 8. Copy this JSON file into the secrets folder created in step 1 and rename it as "data-service-account.json".
-
-**Enabling APIs (make sure to have these APIs enabled on your GCP)**
-1. Cloud Resource Manager API
-2. Vertex AI API
-3. Compute Engine API
-4. Service Usage API
-5. Google Container Registry API
-6. Kubernetes Engine API
 
 **Setup GCS Bucket (data bucket)**
 1. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
@@ -232,10 +232,20 @@ Running our code
 
 This milestone assumes that you have done the steps mentioned for milestone 2 (preprocessing container).
 
+**Setup GCP Service Account**
+1. Create a secrets folder that is on the same level as the project folder.
+2. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
+3. Search for "Service Accounts" from the top search box OR go to: "IAM & Admins" > "Service Accounts" and create a new service account called "model-trainer".
+4. For "Grant this service account access to project", select "Storage Admin", "AI Platform Admin", and "Vertex AI Administrator".
+5. Click done. This will create a service account.
+6. Click on the "..." under the "Actions" column and select "Manage keys".
+7. Click on "ADD KEY" > "Create new key" with "Key type" as JSON.
+8. Copy this JSON file into the secrets folder created in step 1 and rename it as "model-training.json".
+
 **Setup GCS Bucket (trainer bucket)**
 1. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
 2. Search for "Buckets" from the top search box OR go to: "Cloud Storage" > "Buckets" and create a new bucket with an appropriate bucket name e.g. "platepals-trainer".
-3. Click done. This will create a new GCS Bucket (GCS_BUCKET_URI) for the container to uplaod the code used to train the model.
+3. Click done. This will create a new GCS Bucket (GCS_BUCKET_URI) for the container to upload the code used to train the model.
 
 **Set GCP Credentials**
 1. Head to `src/model-training/docker-shell.sh`.
@@ -265,6 +275,10 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 4. **NOTE: EXECUTION MAY TAKE 15 MINUTES TO 1 AN HOUR DEPENDING ON GPU/CPU.** Still inside the docker container, run `python cli.py`.
 3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
 ![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+
+### Milestone 4 ###
+
+This milestone assumes that you have done the steps mentioned for milestone 3 (model-training container).
 
 ### Milestone 4 Part 1: Model Distillation ###
 We follow the exact same instructions as in Milestone 3 but do so making a new folder path for the distilled model. In our project as an example, we have one folder for the base model (`model/effnetv2b0`) and one for the distilled (`model/effnetv2b0_distilled`). Follow the steps in Milestone 3 to modify any environment variables as needed.
@@ -300,6 +314,16 @@ To run the `Data Processor` container serverlessly, we first need to build the d
 - After the image is built, tag the Docker Image: `docker image tag preprocess-image <USER NAME>/preprocess-image`
 - Push to Docker Hub: `docker push <USER NAME>/preprocess-image`
 
+**Setup GCP Service Account**
+1. Create a secrets folder that is on the same level as the project folder.
+2. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
+3. Search for "Service Accounts" from the top search box OR go to: "IAM & Admins" > "Service Accounts" and create a new service account called "platepals-workflow".
+4. For "Grant this service account access to project", select "Storage Admin", "AI Platform Admin", "Vertex AI Administrator", and "Service Account User".
+5. Click done. This will create a service account.
+6. Click on the "..." under the "Actions" column and select "Manage keys".
+7. Click on "ADD KEY" > "Create new key" with "Key type" as JSON.
+8. Copy this JSON file into the secrets folder created in step 1 and rename it as "platepals-workflow.json".
+
 **Vertex AI Pipeline**
 
 After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipelines to automate running all the tasks of the PlatePals app.
@@ -320,7 +344,7 @@ Alternatively, we can test specific components of the pipeline by running the fo
 
 ### Milestone 5: API, Frontend, and Deployment ###
 
-After completions of building a robust ML Pipeline in our previous milestone we have built a backend api service and frontend app. This will be our user-facing application that ties together the various components built in previous milestones. 
+This milestone assumes that you have done the steps mentioned for milestone 4 (workflow container). After completions of building a robust ML Pipeline in our previous milestone we have built a backend api service and frontend app. This will be our user-facing application that ties together the various components built in previous milestones. 
 
 **Application Design**
 
@@ -392,7 +416,20 @@ To run the container locally:
 
 The deployment container helps manage building and deploying all our app containers. The deployment is to GCP and all docker images go to GCR.
 
-To run the container locally:
+**Setup GCP Service Account**
+1. Create a secrets folder that is on the same level as the project folder.
+2. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
+3. Search for "Service Accounts" from the top search box OR go to: "IAM & Admins" > "Service Accounts" and create a new service account called "platepals-workflow".
+4. For "Grant this service account access to project", select "Compute Admin", "Compute OS Login", "Container Registry Service Agent", and "Kubernetes Engine Admin", "Service Account User", and "Storage Admin".
+5. Click done. This will create a service account.
+6. Click on the "..." under the "Actions" column and select "Manage keys".
+7. Click on "ADD KEY" > "Create new key" with "Key type" as JSON.
+8. Copy this JSON file into the secrets folder created in step 1 and rename it as "deployment.json".
+9. Follow steps 1 to 3 to create another new service account called "gcp-service".
+10. For "Grant this service account access to project", select "Storage Object Viewer".
+11. Follow steps 5 to 8 and rename it as "gcp-service.json".
+
+**Deployment**
 
 - Open a terminal and move into `src/deployment`
 - Run `sh docker-shell.sh`
@@ -445,7 +482,34 @@ ansible-playbook deploy-setup-containers.yml -i inventory.yml
 ansible-playbook deploy-setup-webserver.yml -i inventory.yml
 ```
 - Once the command runs, go to `http://<External IP>/`
+- Delete the Compute Instance
+```
+ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluster_state=absent
+```
 
+**Deployment with Scaling using Kubernetes**
+
+Make sure that you are able to deploy with ansible before deploying with Kubernetes.
+- Open a terminal and move into `src/deployment`
+- Run `sh docker-shell.sh`
+- Check version of tools with `gcloud --version`, `kubect1 version`, `kubect1 version --client`
+- Check to make sure you are authenticated to GCP with `gcloud auth list`
+
+Build and Push Docker Containers to GCR (Google Container Registry) (This step is only required if you have NOT already done this)
+```
+ansible-playbook deploy-docker-images.yml -i inventory.yml
+```
+Create and Deploy Cluster
+```
+ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=present
+```
+View the App
+- Copy the `nginx_ingress_ip` from the terminal from the create cluster command
+- Go to the `http://<YOUR INGRESS IP>.sslip.io` to view the app
+Delete Cluster
+```
+ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=absent
+```
 
 DVC Setup
 ------------
