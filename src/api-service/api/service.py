@@ -187,6 +187,6 @@ async def predict(file: bytes = File(...)):
 @app.get("/status")
 async def get_api_status():
     return {
-        "version": "0.1",
+        "version": "0.2",
         "tf_version": tf.__version__,
     }
