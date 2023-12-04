@@ -8,7 +8,7 @@ all:
       gcp_scopes: "https://www.googleapis.com/auth/compute"
       gcp_project: "platepals-405005"
       gcp_region: "us-east1"
-      gcp_zone: "us-east1-b"
+      gcp_zone: "us-east1-c"
       docker_network_name: "appnetwork"
       persistent_disk_name: "platepals-app-demo-disk"
       persistent_disk_size: 50
