@@ -52,8 +52,8 @@ const Home = (props) => {
                         </Grid>
                         <Grid item xs={8}>
                         <h1>&#129302; Hello! I am your PlatePals AI Assistant!</h1>
-                        <h2>The goal of PlatePals is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with the predicted food label and can offer relevant nutritional information and personalized dietary recommendations via a <a href="/imageclassification">ChatBot</a> using state-of-the-art GPT models.</h2>
-                        <h2>Simply upload an image on the <a href="/imageclassification">Upload Image</a> tab to get started!</h2>
+                        <h2>The goal of PlatePals is to develop a machine learning application that accurately identifies the types of food present in a user-uploaded image. Based on the foods identified, the application will provide the user with the predicted food label and can offer relevant nutritional information and personalized dietary recommendations via a ChatBot using state-of-the-art GPT models.</h2>
+                        <h2>Simply upload an image on the Upload Image tab to get started!</h2>
                         </Grid>
                     </Grid>
                 </Container>
