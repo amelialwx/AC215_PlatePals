@@ -18,7 +18,8 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
-
+import { APP_VERSION } from '../../services/Common';
+import DataService from "../../services/DataService";
 
 import styles from './styles';
 
@@ -33,6 +34,13 @@ const Header = (props) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
     const [settingsMenuAnchorEl, setSettingsMenuAnchorEl] = useState(null);
+    const [version, setVersion] = useState(null);
+    const loadStatus = () => {
+        DataService.GetStatus()
+            .then(function (response) {
+                setVersion(response.data["version"]);
+            });
+    }
 
     // Handlers
     const toggleDrawer = (open) => () => {
@@ -57,8 +65,16 @@ const Header = (props) => {
                             🥘 PlatePals AI Assistant
                         </Typography>
                     </Link>
-
+                    <div>
+                        <IconButton color="inherit" >
+                            <Typography variant="caption">&nbsp;App Version: {APP_VERSION}</Typography>
+                        </IconButton>
+                        {/*  <IconButton color="inherit" >
+                             <Typography variant="caption">&nbsp;API Version: {version}</Typography>
+                         </IconButton> */}
+                    </div>
                     <div className={classes.grow} />
+
                     <div>
                         <IconButton color="inherit" component={Link} to="/">
                             <Icon>home</Icon>
