@@ -506,6 +506,7 @@ ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_st
 View the App
 - Copy the `nginx_ingress_ip` from the terminal from the create cluster command
 - Go to the `http://<YOUR INGRESS IP>.sslip.io` to view the app
+
 Delete Cluster
 ```
 ansible-playbook deploy-k8s-cluster.yml -i inventory.yml --extra-vars cluster_state=absent
