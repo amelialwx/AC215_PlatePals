@@ -114,7 +114,7 @@ Running our code
 1. Make sure the Doker application is operational.
 2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
 3. Upon completion, your GCS Bucket should display the processed data as shown under the default folder name "preprocessed_data" (you can change this in preprocess.py).
-![bucket-data](assets/bucket-data.png)
+![bucket-data](../assets/bucket-data.png)
 
 ### Milestone 3 (model-training container) ###
 
@@ -136,7 +136,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 1. Login to [Weights and Biases](https://wandb.ai/).
 2. Go to [user settings](https://wandb.ai/settings).
 3. Scroll down to the `API Keys` section.
-![wandb-api-key](assets/wandb-api-key.png)
+![wandb-api-key](../assets/wandb-api-key.png)
 4. Copy the key and set an environment variable using your terminal: `export WANDB_KEY=...`
 5. Set another environment variable for your GCS data bucket (that contains your data): `export GCS_BUCKET_NAME=...`
 
@@ -149,10 +149,10 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 2. Navigate to `src/model-training` and execute `sh docker-shell.sh`.
 3. Once you are in the docker container, run `sh package-trainer.sh`.
 4. You should be able to see that a `tar.gz` file has been uploaded to your GCS trainer bucket.
-![bucket-trainer](assets/bucket-trainer.png)
+![bucket-trainer](../assets/bucket-trainer.png)
 4. **NOTE: EXECUTION MAY TAKE 15 MINUTES TO 1 AN HOUR DEPENDING ON GPU/CPU.** Still inside the docker container, run `sh cli.sh`.
 3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
-![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+![vertex-ai-finished-jobs](../assets/vertex-ai-finished-jobs.png)
 
 Results
 ------------
@@ -160,12 +160,12 @@ Results
 
 Below you can see the output from our Weights & Biases page. We used this tool to track several iterations of our model training when it trained our EfficientNet. It was tracked using the `wandb` library we included inside of our `task.py` script. Below is a screenshot of one iteration that we performed with EfficientNetV2B0 for 3 epochs.
 
-![wnb](assets/wnb.jpg)
+![wnb](../assets/wnb.jpg)
 
 **Serverless Training**
 
 Inside our training container, we sent our training job to GCP Vertex AI so it is trained on instances in the cloud, which was how we connected to the Weights & Biases in the previous image above. In the image below, you can see several runs of our model. We had a successful completion of the custom job.
-![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+![vertex-ai-finished-jobs](../assets/vertex-ai-finished-jobs.png)
 
 DVC Setup
 ------------
@@ -223,7 +223,7 @@ git tag -a 'dataset_v1' -m 'tag dataset'
 git push --atomic origin main dataset_v1
 ```
 11. You should see the tagged dataset on your private repo.
-![dvc-tag](assets/dvc-tag.png)
+![dvc-tag](../assets/dvc-tag.png)
 
 
 Discussion Regarding Tools Used

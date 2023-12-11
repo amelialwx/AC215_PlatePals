@@ -74,7 +74,7 @@ Running our code
 1. Make sure the Docker application is operational.
 2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
 3. Upon completion, your GCS Bucket should display the processed data as shown under the default folder name "version1".
-![bucket-data](assets/bucket-data.png)
+![bucket-data](../assets/bucket-data.png)
 
 DVC Setup
 ------------

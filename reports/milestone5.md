@@ -226,7 +226,7 @@ Running our code
 1. Make sure the Doker application is operational.
 2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
 3. Upon completion, your GCS Bucket should display the processed data as shown under the default folder name "preprocessed_data" (you can change this in preprocess.py).
-![bucket-data](assets/bucket-data.png)
+![bucket-data](../assets/bucket-data.png)
 
 ### Milestone 3 (model-training container) ###
 
@@ -258,7 +258,7 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 1. Login to [Weights and Biases](https://wandb.ai/).
 2. Go to [user settings](https://wandb.ai/settings).
 3. Scroll down to the `API Keys` section.
-![wandb-api-key](assets/wandb-api-key.png)
+![wandb-api-key](../assets/wandb-api-key.png)
 4. Copy the key and set an environment variable using your terminal: `export WANDB_KEY=...`
 5. Set another environment variable for your GCS data bucket (that contains your data): `export GCS_BUCKET_NAME=...`
 
@@ -271,10 +271,10 @@ This milestone assumes that you have done the steps mentioned for milestone 2 (p
 2. Navigate to `src/model-training` and execute `sh docker-shell.sh`.
 3. Once you are in the docker container, run `sh package-trainer.sh`.
 4. You should be able to see that a `tar.gz` file has been uploaded to your GCS trainer bucket.
-![bucket-trainer](assets/bucket-trainer.png)
+![bucket-trainer](../assets/bucket-trainer.png)
 4. **NOTE: EXECUTION MAY TAKE 15 MINUTES TO 1 AN HOUR DEPENDING ON GPU/CPU.** Still inside the docker container, run `python cli.py`.
 3. Upon completion, your custom job should populate in GCP Vertex AI and model dashboard should show up in Weights and Biases.
-![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+![vertex-ai-finished-jobs](../assets/vertex-ai-finished-jobs.png)
 
 ### Milestone 4 ###
 
@@ -289,12 +289,12 @@ Results
 
 Below you can see the output from our Weights & Biases page. We used this tool to track several iterations of our model training when it trained our EfficientNet. It was tracked using the `wandb` library we included inside of our `task.py` script. Below is a screenshot of one iteration that we performed with EfficientNetV2B0 for 3 epochs.
 
-![wnb](assets/wnb.jpg)
+![wnb](../assets/wnb.jpg)
 
 **Serverless Training**
 
 Inside our training container, we sent our training job to GCP Vertex AI so it is trained on instances in the cloud, which was how we connected to the Weights & Biases in the previous image above. In the image below, you can see several runs of our model. We had a successful completion of the custom job.
-![vertex-ai-finished-jobs](assets/vertex-ai-finished-jobs.png)
+![vertex-ai-finished-jobs](../assets/vertex-ai-finished-jobs.png)
 
 ### Milestone 4 Part 2: ML Workflow Management ###
 We put all the components we built for our PlatePals App together. We then apply workflow management methods to test, execute, monitor, and automate these components on Vertex AI:
@@ -335,7 +335,7 @@ After pushing the data_processor image to the Docker Hub, we use Vertex AI Pipel
 - Run `python cli.py --pipeline`, this will orchestrate all the tasks for the workflow and create a definition file called pipeline.yaml.
 - Go to [Vertex AI Pipeline](https://console.cloud.google.com/vertex-ai/pipelines/runs?project=platepals-400123) to inspect the status of the job.
 - After the job is submitted, in the image below, you can see each container being run in sequence. We had a successful completion of the pipeline.
-![vertex-ai-pipeline](assets/vertex-ai-pipeline.png)
+![vertex-ai-pipeline](../assets/vertex-ai-pipeline.png)
 
 Alternatively, we can test specific components of the pipeline by running the folowing commands:
 - For Data Processor: Run `python cli.py --data_processor`
@@ -351,16 +351,16 @@ This milestone assumes that you have done the steps mentioned for milestone 4 (w
 Before we start implementing the app, we built a detailed design document outlining the application’s architecture. We built a Solution Architecture and Technical Architecture to ensure all our components work together.
 
 Here is our Solution Architecture:
-![solution_architecture](assets/solution_architecture.png)
+![solution_architecture](../assets/solution_architecture.png)
 
 Here is our Technical Architecture:
-![technical_architecture](assets/technical_architecture.png)
+![technical_architecture](../assets/technical_architecture.png)
 
 **Backend API**
 
 We built backend API service using Fast API to expose model functionality to the frontend. We also added APIs that will help the frontend display some key information about the model and data.
-![backend_api](assets/backend_api.png)
-![backend_api2](assets/backend_api2.png)
+![backend_api](../assets/backend_api.png)
+![backend_api2](../assets/backend_api2.png)
 
 **Frontend**
 
@@ -368,16 +368,16 @@ A user friendly React app was built to identify food images uploaded by the user
 
 Here are some screenshots of our app (1st image: CNN Model prediction serving results after user uploaded image, 2nd image: AI ChatBot enabled after prediction along with possible prompt suggestions based on user upload, 3rd image: App home page):
 
-<img src="assets/frontend-pred.jpg"  width="800">
-<img src="assets/frontend-chatbot.jpg"  width="800">
-<img src="assets/frontend-home.jpg"  width="800">
+![frontend-pred](../assets/frontend-pred.jpg)
+![frontend-chatbot](../assets/frontend-chatbot.jpg)
+![frontend-home](../assets/frontend-home.jpg)
 
 **Deployment**
 
 We used Ansible to create, provision, and deploy our frontend and backend to GCP in an automated fashion. Ansible helps us manage infrastructure and this is very useful to keep track of our app infrastructure as code in GitHub. It helps use setup deployments in a very automated way.
 
 Here is our deployed app on a single VM in GCP:
-![ansible_deployment](assets/ansible_deployment.png)
+![ansible_deployment](../assets/ansible_deployment.png)
 
 ### Code Structure
 
@@ -429,7 +429,7 @@ The deployment container helps manage building and deploying all our app contain
 10. For "Grant this service account access to project", select "Storage Object Viewer".
 11. Follow steps 5 to 8 and rename it as "gcp-service.json".
 
-**Deployment**
+**Deployment with Ansible**
 
 - Open a terminal and move into `src/deployment`
 - Run `sh docker-shell.sh`
@@ -568,7 +568,7 @@ git tag -a 'dataset_v1' -m 'tag dataset'
 git push --atomic origin main dataset_v1
 ```
 11. You should see the tagged dataset on your private repo.
-![dvc-tag](assets/dvc-tag.png)
+![dvc-tag](../assets/dvc-tag.png)
 
 
 Discussion Regarding Tools Used
@@ -588,5 +588,5 @@ Discussion Regarding Tools Used
 In our project, we opted for model distillation over other techniques like quantization and compression to optimize our EfficientV2B0 model. The primary reason for this choice is that distillation allows for the preservation of model accuracy while reducing computational overhead. Distillation operates by transferring knowledge from a larger, more complex model (the "teacher") to a smaller, more efficient one (the "student"). This not only enables the student model to learn generalized features effectively but also to mimic the performance of the teacher model closely. Quantization, although effective in reducing model size, can introduce non-trivial quantization errors that compromise the model's accuracy. Compression techniques like pruning might reduce the network's size but can also result in a loss of important features and make the model architecture more complex to handle. Therefore, given that our primary objective was to balance both model size and accuracy efficiently, distillation emerged as the most fitting choice. 
 
 Here are the results that we obtained from our original EfficientNetV2B0 model vs. the distilled model.
-![distillation_wandb.png](assets/distillation_wandb.png)
+![distillation_wandb.png](../assets/distillation_wandb.png)
 From the metrics, it's evident that the distilled version of the EfficientNetV2B0 model underperformed compared to its non-distilled counterpart, even after training for 30 epochs. Distillation, while an effective approach in theory, relies heavily on the quality of knowledge transfer between the teacher and student models. We believe that for case, the student model failed to capture the intricacies and essential features from the teacher model, resulting in suboptimal performance. Additionally, our teacher model might have noisy or redundant features, in which case distillation would propagate those, degrading the student model's performance. Given the significant drop in accuracy, it makes sense to prioritize the metric that is most critical to the project's goals. Therefore, in light of the results and our commitment to achieving the best possible accuracy, we've decided to proceed with the original non-distilled EfficientNetV2B0 model.
