@@ -8,7 +8,7 @@ import tensorflow_datasets as tfds
 from tensorflow.keras.layers.experimental import preprocessing
 from google.cloud import storage
 
-IMG_SIZE = 128
+IMG_SIZE = 224
 
 # GCS
 # BUCKET_NAME = os.environ.get('GCS_BUCKET_NAME', 'default-bucket-name')
