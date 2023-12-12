@@ -56,7 +56,7 @@ async def predict(file: bytes = File(...)):
     
     if self_host_model:
         download_file(
-            "https://github.com/amelialwx/models/releases/download/v2.0/model.zip",
+            "https://github.com/amelialwx/PlatePals/releases/download/v1.0/model.zip",
             base_path="artifacts",
             extract=True,
         )
