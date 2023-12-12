@@ -23,8 +23,6 @@ GCS_SERVICE_ACCOUNT = os.environ["GCS_SERVICE_ACCOUNT"]
 GCS_PACKAGE_URI = os.environ["GCS_PACKAGE_URI"]
 GCP_REGION = os.environ["GCP_REGION"]
 
-# DATA_COLLECTOR_IMAGE = "gcr.io/ac215-project/mushroom-app-data-collector"
-#DATA_PROCESSOR_IMAGE = "amelialwx/preprocess-image:version1" # CHANGE THIS
 DATA_PROCESSOR_IMAGE = "amelialwx/preprocess-image" # CHANGE THIS
 
 
