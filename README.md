@@ -190,25 +190,26 @@ The goal of this project is to develop a machine learning application that accur
 We'll predominantly employ TensorFlow's [Food-101 dataset](https://www.tensorflow.org/datasets/catalog/food101), featuring 101,000 annotated food images across 101 categories. Additionally, we will correlate the identified food items with nutritional metrics obtained from Kaggle's Nutrition datasets and a database called Nutritional Facts for Most Common Foods, which together offer around 9,000 nutritional records. Our dataset is securely hosted in a private Google Cloud Bucket.
 
 ## Table of Contents ##
-- [Enable APIs](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#enable-apis)
-- [Recap of Milestone 2](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#recap-of-milestone-2)
-    - [`preprocessing` Container](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#preprocessing-container)
-- [Recap of Milestone 3](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#recap-of-milestone-3)
-    - [`model-training` Container](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#model-training-container)
-- [Recap of Milestone 4: Part 1](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#recap-of-milestone-4-part-1)
-- [Recap of Milestone 4: Part 2](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#recap-of-milestone-4-part-2)
-    - [`workflow` Container](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#workflow-container)
-- [Recap of Milestone 5](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#recap-of-milestone-5)
-    - [Application Design](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#application-design)
-    - [Backend API](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#backend-api)
-    - [Frontend](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#frontend)
-    - [Deployment](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#deployment)
-- [Milestone 6](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#milestone-6)
-    - [`api-service` Container](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#api-service-container)
-    - [`frontend-react` Container](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#frontend-react-container)
-    - [`deployment` Container](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#deployment-container)
-    - [Deployment with Scaling using Kubernetes](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#deployment-with-scaling-using-kubernetes)
-- [Discussion Regarding Tools Used](https://github.com/amelialwx/AC215_PlatePals/tree/milestone6#discussion-regarding-tools-used)
+- [Enable APIs](https://github.com/amelialwx/AC215_PlatePals/tree/main#enable-apis)
+- [Recap of Milestone 2](https://github.com/amelialwx/AC215_PlatePals/tree/main#recap-of-milestone-2)
+    - [`preprocessing` Container](https://github.com/amelialwx/AC215_PlatePals/tree/main#preprocessing-container)
+- [DVC Setup](https://github.com/amelialwx/AC215_PlatePals/tree/main#dvc-setup)
+- [Recap of Milestone 3](https://github.com/amelialwx/AC215_PlatePals/tree/main#recap-of-milestone-3)
+    - [`model-training` Container](https://github.com/amelialwx/AC215_PlatePals/tree/main#model-training-container)
+- [Recap of Milestone 4: Part 1](https://github.com/amelialwx/AC215_PlatePals/tree/main#recap-of-milestone-4-part-1)
+- [Recap of Milestone 4: Part 2](https://github.com/amelialwx/AC215_PlatePals/tree/main#recap-of-milestone-4-part-2)
+    - [`workflow` Container](https://github.com/amelialwx/AC215_PlatePals/tree/main#workflow-container)
+- [Recap of Milestone 5](https://github.com/amelialwx/AC215_PlatePals/tree/main#recap-of-milestone-5)
+    - [Application Design](https://github.com/amelialwx/AC215_PlatePals/tree/main#application-design)
+    - [Backend API](https://github.com/amelialwx/AC215_PlatePals/tree/main#backend-api)
+    - [Frontend](https://github.com/amelialwx/AC215_PlatePals/tree/main#frontend)
+    - [Deployment](https://github.com/amelialwx/AC215_PlatePals/tree/main#deployment)
+- [Milestone 6](https://github.com/amelialwx/AC215_PlatePals/tree/main#milestone-6)
+    - [`api-service` Container](https://github.com/amelialwx/AC215_PlatePals/tree/main#api-service-container)
+    - [`frontend-react` Container](https://github.com/amelialwx/AC215_PlatePals/tree/main#frontend-react-container)
+    - [`deployment` Container](https://github.com/amelialwx/AC215_PlatePals/tree/main#deployment-container)
+    - [Deployment with Scaling using Kubernetes](https://github.com/amelialwx/AC215_PlatePals/tree/main#deployment-with-scaling-using-kubernetes)
+- [Discussion Regarding Tools Used](https://github.com/amelialwx/AC215_PlatePals/tree/main#discussion-regarding-tools-used)
 
 ## Enable APIs ##
 Make sure to have these APIs enabled before running our code.
@@ -256,6 +257,63 @@ In milestone 2, we provide a container that pulls data from the TensorFlow [Food
 2. **NOTE: EXECUTION MAY TAKE 2-3 HOURS DEPENDING ON NETWORK SPEED.** Navigate to src/preprocessing and execute `sh docker-shell.sh`.
 3. Upon completion, your GCS Bucket should display the processed data as shown under the default folder name "preprocessed_data" (you can change this in preprocess.py).
 ![bucket-data](assets/bucket-data.png)
+
+## DVC Setup ##
+This step is entirely optional.
+1. Create a VM on Google Cloud Platform
+2. Install Docker on the VM
+```
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+sudo docker run hello-world
+```
+3. Install git: `sudo apt-get install git`
+4. Set up git SSH on the VM `ssh-keygen -t ed25519 -C "youremail@gmail.com"` (Press enter for all 3 questions)
+5. Your public key is located in `cat /home/<name>/.ssh/id_ed25519.pub` (Copy contents of this file on to clipboard) 
+5. Go to -> GitHub.com -> Settings (top right under your pfp) -> SSH and GPG keys (left) -> New SSH key -> give any title -> copy contents in key -> Add SSH Key (please login again when asked)
+6. Copy following files from [https://github.com/ac2152023/dvcrepo](https://github.com/ac2152023/dvcrepo) to your private repo
+```
+Dockerfile
+Pipfile
+Pipfile.lock
+docker-entrypoint.sh
+docker-shell.sh
+.gitignore
+```
+7. `git clone git@github.com:{USERNAME}/<privaterepo>.git`
+8. Upload your secrets to secrets folder , check entries in docker-entrypoint.sh, docker-shell.sh
+9. Run `sudo sh docker-shell.sh`
+10. Run these commands in the docker container for DVC
+```   
+mkdir dvc
+gcsfuse {GCS_BUCKET_NAME}/preprocessed dvc/
+dvc init
+dvc remote add -d dvc gs://{GCS_BUCKET_NAME}/dvc_store
+dvc add mushdvc  
+dvc push
+
+git status
+git add .
+git commit -m 'dataset update 1'
+git tag -a 'dataset_v1' -m 'tag dataset'
+git push --atomic origin main dataset_v1
+```
+11. You should see the tagged dataset on your private repo.
+![dvc-tag](assets/dvc-tag.png)
 
 ## Recap of Milestone 3 ##
 
