@@ -328,6 +328,8 @@ In milestone 3, we provide a container to read our training, validation, and tes
 - Required inputs: GCS Project Name, GCS Bucket Name (data), GCS Bucket Name (model code), and WandB key.
 - Output: Model output in Weights and Biases and Vertex AI
 
+To get a closer look at our model's training process, please take a look at our [Jupyter Notebook](https://github.com/amelialwx/platepals/blob/main/notebooks/model_training.ipynb). This notebook outlines the steps we took in preprocessing our images and training our model. For deployment, our model is compatible with Vertex AI for cloud-based applications and is also available for local deployment through our GitHub releases at [PlatePals Model Releases](https://github.com/amelialwx/PlatePals/releases).
+
 **Setup GCP Service Account**
 1. Create a secrets folder that is on the same level as the project folder.
 2. Head to [GCP Console](https://console.cloud.google.com/home/dashboard).
@@ -658,7 +660,7 @@ Discussion Regarding Tools Used
 
 4. **TF Data and TF Records**: Our project employs TensorFlow's tf.data and TFRecords as part of our data pipeline, specifically to facilitate efficient and scalable training of our image classification model based on EfficientNetV2B0. TFRecords offer a compact binary storage format, which is optimized for TensorFlow, allowing for rapid data loading. Coupled with the tf.data, it enables us to create highly performant input pipelines, thereby reducing I/O bottlenecks. By leveraging tf.data and TFRecords, we are able to ensure that the data feeding process doesn't become a bottleneck.
 
-5. **EfficientNetV2B0**: EfficientNetV2B0 is an evolution of the original EfficientNet architecture, designed for both improved accuracy and computational efficiency in the context of image classification tasks. According to [this study](https://github.com/amelialwx/AC215_PlatePals/blob/milestone6/references/EfficientNetV2.pdf), the EfficientNetV2 models train faster while being up to 6.8x smaller. These enhancements make EfficientNetV2B0 an attractive choice for our project, as it allows us to achieve state-of-the-art accuracy while also maintaining computational efficiency, a key factor given the resource constraints that are often present in real-world machine learning projects.
+5. **EfficientNetV2B0**: EfficientNetV2B0 is an evolution of the original EfficientNet architecture, designed for both improved accuracy and computational efficiency in the context of image classification tasks. According to [this study](https://github.com/amelialwx/PlatePals/blob/mainc/references/EfficientNetV2.pdf), the EfficientNetV2 models train faster while being up to 6.8x smaller. These enhancements make EfficientNetV2B0 an attractive choice for our project, as it allows us to achieve state-of-the-art accuracy while also maintaining computational efficiency, a key factor given the resource constraints that are often present in real-world machine learning projects.
 
 6. **EfficientNetV2B0 Distilled**: 
 
