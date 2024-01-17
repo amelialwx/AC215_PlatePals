@@ -1,4 +1,4 @@
-AC215 - PlatePals
+PlatePals
 ==============================
 
 ### Presentation Video ###
